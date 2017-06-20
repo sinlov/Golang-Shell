@@ -47,7 +47,7 @@ fi
 
 if [ -f "${set_path_file}" ]; then
   cat > "${set_path_file}" << EOF
-# environment set by https://github.com/sinlov
+# environment set by https://github.com/sinlov/Golang-Shell
 
 EOF
 fi
@@ -55,7 +55,7 @@ fi
 echo -e "golang evn set at ${set_path_file}
 You can change by your self(empty is not change):"
 read customSetPathFile
-if [ ! -n $customSetPathFile ]; then
+if [ ! -n "$customSetPathFile" ]; then
   set_path_file="${customSetPathFile}"
 fi
 

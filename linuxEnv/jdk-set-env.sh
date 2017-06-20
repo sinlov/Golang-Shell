@@ -24,7 +24,7 @@ JAVA_HOME -> ${jdkInstallPath}
 
 if [ -f "${set_path_file}" ]; then
   cat > "${set_path_file}" << EOF
-# environment set by https://github.com/sinlov
+# environment set by https://github.com/sinlov/Golang-Shell
 
 EOF
 fi
