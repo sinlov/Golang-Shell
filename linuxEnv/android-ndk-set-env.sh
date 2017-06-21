@@ -22,7 +22,7 @@ Env set file path: ${set_path_file}
 JAVA_HOME -> ${androidNDKInstallPath}
 \n"
 
-if [ -f "${set_path_file}" ]; then
+if [ ! -f "${set_path_file}" ]; then
   cat > "${set_path_file}" << EOF
 # environment set by https://github.com/sinlov/Golang-Shell
 
