@@ -30,6 +30,7 @@ EOF
 fi
 
 cat >> "${set_path_file}" << EOF
+
 # set java environment
 export JAVA_HOME=${jdkInstallPath}
 export PATH=\$JAVA_HOME/bin:\$PATH

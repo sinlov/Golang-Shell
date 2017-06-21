@@ -66,6 +66,7 @@ if [ ! -d "${set_go_path_evn}" ]; then
 fi
 
 cat >> "${set_path_file}" << EOF
+
 # golang evn set
 export GOROOT=${golang_install_path}
 export PATH=\$PATH:\$GOROOT/bin

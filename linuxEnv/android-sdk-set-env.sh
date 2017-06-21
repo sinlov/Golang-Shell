@@ -30,6 +30,7 @@ EOF
 fi
 
 cat >> "${set_path_file}" << EOF
+
 # set android environment
 ANDROID_HOME=${androidInstallPath}
 export ANDROID_HOME

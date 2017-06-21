@@ -30,6 +30,7 @@ EOF
 fi
 
 cat >> "${set_path_file}" << EOF
+
 # set androidNDK environment
 ANDROID_NDK_HOME=${androidNDKInstallPath}
 export ANDROID_NDK_HOME
