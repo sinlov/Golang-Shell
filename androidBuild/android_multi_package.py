@@ -273,7 +273,7 @@ def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, br
         log_printer(clone_is_exists, 'i', True)
     else:
         cmd_line = 'git clone %s -b %s %s' % (project_url, branch, local_path)
-        execute_cli(cmd_line, root_run_path, out_of_time_clone)
+        exec_cli_print_line(cmd_line)
     git_branch_check = 'git branch -v'
     exec_cli_print_line(git_branch_check)
     git_pull_head = 'git pull'
@@ -340,6 +340,7 @@ def build_android_project_at_module_by_task(local, tasks):
                     True)
     else:
         log_printer('\n=== project build fail ===\nBuild cli:%s\n=== project build fail ===\n' % cmd_build, 'w', True)
+        exit(1)
 
 
 def auto_clean_build_project(local=str):
