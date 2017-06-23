@@ -319,6 +319,9 @@ def build_android_project_at_module_by_task(local, tasks):
     if not check_dir_or_file_is_exist(gradlew_path):
         log_printer('Not found %s at Path: %s\exit 1' % (gradlew_tag, local), 'e', True)
         exit(1)
+    if not is_platform_windows():
+        gradlew_exec = 'chmod +x %s' % gradlew_tag
+        exec_cli(gradlew_exec, local, out_of_time_default, True)
     if len(tasks) < 1:
         log_printer('You are not set any task please check config \exit 1\n', 'e', True)
         exit(1)
@@ -340,7 +343,7 @@ def build_android_project_at_module_by_task(local, tasks):
                     True)
     else:
         log_printer('\n=== project build fail ===\nBuild cli:%s\n=== project build fail ===\n' % cmd_build, 'w', True)
-        exit(1)
+        os._exit(1)
 
 
 def auto_clean_build_project(local=str):
