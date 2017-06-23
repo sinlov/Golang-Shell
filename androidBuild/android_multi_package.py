@@ -157,8 +157,7 @@ def exec_cli_print_line(cli_line=str, cwd=None):
     """
     info = "cli line: %s\n" % cli_line
     log_printer(info, 'i', True)
-    res = subprocess.Popen(cli_line, cwd=None, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                           close_fds=True)
+    res = subprocess.Popen(cli_line, cwd=None, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     str_info = "cmd_line: %s\n%s" % (cli_line, res.stdout.readline())
     log_printer(str_info, 'i', True)
 
