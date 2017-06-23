@@ -1,0 +1,43 @@
+{
+  "build_path": "build",
+  "build_projects": [
+    {
+      "name": "OsMobile",
+      "git_url": "ssh://git@gitlab.shishike.com:38401/c_iphone/OSMobile.git",
+      "local": "OSMobile",
+      "branch": "main-develop",
+      "tag": "",
+      "module": "app",
+      "version_name": "V1.4.0-SNAPSHOT",
+      "version_code": "2110010400",
+      "task": "OsTest",
+      "mode": "debug",
+      "args": [
+        {
+          "replace_gradle_properties": [
+            {
+              "tag": "VERSION_NAME",
+              "from": "V1.4.0-SNAPSHOT",
+              "to": "V1.4.0-SNAPSHOT"
+            },
+            {
+              "tag": "VERSION_CODE",
+              "from": "2110010400",
+              "to": "2110010400"
+            },
+            {
+              "tag": "NEXUS_RELEASE",
+              "from": "http://nexus.shishike.com/nexus/content/repositories/releases/",
+              "to": "http://nexus.shishike.com/nexus/content/repositories/releases/"
+            },
+            {
+              "tag": "NEXUS_SNAPSHOT",
+              "from": "http://nexus.shishike.com/nexus/content/repositories/snapshots/",
+              "to": "http://nexus.shishike.com/nexus/content/repositories/snapshots/"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
