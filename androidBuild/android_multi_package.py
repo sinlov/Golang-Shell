@@ -4,15 +4,16 @@ import os
 import sys
 import platform
 import stat
+import time
 import datetime
 import shlex
 import subprocess
 
 import logging
 import logging.handlers
-import optparse
+import getpass
 
-import time
+import optparse
 
 __author__ = 'sinlov'
 
@@ -22,18 +23,21 @@ sys.setdefaultencoding('utf-8')
 is_verbose = False
 root_run_path = os.getcwd()
 this_tag = 'android_multi_build_'
+
 """
-执行单位构建超时时间 60 * 5 秒
+执行默认超时时间 60 * 1 秒
 """
-max_out_of_time = 60 * 5
+out_of_time_default = 60 * 1
+"""
+执行单位克隆超时时间 60 * 10 秒
+"""
+out_of_time_clone = 60 * 10
+"""
+执行单位构建超时时间 60 * 20 秒
+"""
+out_of_time_build = 60 * 20
 
 build_gradle_properties = 'gradle.properties'
-
-android_build_path = 'build'
-android_project_path = "OSMobile"
-android_build_branch = "main-develop"
-android_build_module = "app"
-android_build_task = "OsCiTest"
 
 
 def find_now_time_format(format_time=str):
@@ -75,7 +79,7 @@ def init_logger(first_tag, sec_tag=str):
     fmt = '%(asctime)s - %(filename)s:%(lineno)s - %(name)s - %(levelname)s - %(message)s'
     formatter = logging.Formatter(fmt)
     handler.setFormatter(formatter)
-    logger = logging.getLogger('sinlov')
+    logger = logging.getLogger(str(getpass.getuser()))
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
     return logger
@@ -145,18 +149,18 @@ def replace_text(t_file=str, s_str=str, r_str=str):
         print e
 
 
-def exec_popen(cmd_line=str):
+def exec_popen(cli_line=str):
     """比较过时的执行命令的方法，只会捕获输出，打印到日志里面
-    :param cmd_line: 执行命令
+    :param cli_line: 执行命令
     """
-    res = os.popen(cmd_line)
+    res = os.popen(cli_line)
     out_put = res.read()
-    str_info = "cmd_line: %s\n%s" % (cmd_line, out_put)
+    str_info = "cmd_line: %s\n%s" % (cli_line, out_put)
     log_printer(str_info, 'i', True)
     res.close()
 
 
-def execute_command(cmd_string, cwd=None, timeout=None, is_shell=False):
+def execute_command(cli_string, cwd=None, timeout=None, is_shell=False, is_info=False):
     """执行一个SHELL命令
         封装了subprocess的Popen方法, 支持超时判断，支持读取stdout和stderr
         如果没有指定标准输出和错误输出的管道，因此会打印到屏幕上
@@ -167,17 +171,18 @@ def execute_command(cmd_string, cwd=None, timeout=None, is_shell=False):
             subprocess.poll()方法：检查子进程是否结束了，如果结束了
             设定并返回码，放在subprocess.returncode变量中
     参数:
-      :param cmd_string 运行命令字符串
+      :param cli_string 运行命令字符串
       :param cwd 运行命令时更改路径，如果被设定，子进程会直接先更改当前路径到cwd
       :param timeout 超时时间，秒，支持小数，精度0.1秒，默认不输入无超时
       :param is_shell 是否通过shell运行,使用 shlex.split 来解析
+      :param is_info 是否同时打印输出
     :return: return class Popen(object)
     :raises: Exception: 执行超时
     """
     if is_shell:
-        cmd_string_list = cmd_string
+        cmd_string_list = cli_string
     else:
-        cmd_string_list = shlex.split(cmd_string)
+        cmd_string_list = shlex.split(cli_string)
     if timeout:
         end_time = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
     sub = subprocess.Popen(cmd_string_list, cwd=cwd,
@@ -185,34 +190,38 @@ def execute_command(cmd_string, cwd=None, timeout=None, is_shell=False):
                            stderr=subprocess.PIPE, shell=is_shell,
                            bufsize=4096)
     while sub.poll() is None:
+        if is_info:
+            print sub.stdout.readline(),
         time.sleep(0.1)
         if timeout:
             if end_time <= datetime.datetime.now():
-                raise Exception("Timeout：%s" % cmd_string)
+                raise Exception('Timeout：%s' % cli_string)
     return sub
 
 
-def exec_cli(cmd_string, cwd=None, timeout=None, is_shell=False):
+def exec_cli(cmd_string, cwd=None, time_out=None, is_shell=False):
     """执行一个SHELL命令
         封装了subprocess的Popen方法, 支持超时判断，支持读取stdout和stderr
+        默认开启打印执行输出，不可修改
         操时已经使用 max_out_of_time 设置
     参数:
       :param cmd_string 运行命令字符串
       :param cwd 运行命令时更改路径，如果被设定，子进程会直接先更改当前路径到cwd
+      :param time_out 超时时间，秒，支持小数，精度0.1秒，默认不输入 超时使用 max_out_of_time 设置
       :param is_shell 是否通过shell运行,使用 shlex.split 来解析
     :return: return class Popen(object)
     :raises: Exception: 执行超时
     """
     try:
-        if timeout is None:
-            timeout = max_out_of_time
+        if time_out is None:
+            time_out = out_of_time_default
         if is_verbose:
-            print 'cli:%s\ncwd:%s\ntimeOut:%s\nis_shell:%s' % (cmd_string, cwd, timeout, is_shell)
-        command_out = execute_command(cmd_string, cwd, timeout, is_shell)
+            print 'cli -> %s\ncwd -> %s\ntimeOut -> %s\nis_shell -> %s' % (cmd_string, cwd, time_out, is_shell)
+        command_out = execute_command(cmd_string, cwd, time_out, is_shell, True)
         if command_out.returncode == 0:
             str_info = "cmd_line success: %s\n%s" % (cmd_string, str(command_out.stdout.read()))
             command_out.stdout.close()
-            log_printer(str_info, 'i', True)
+            log_printer(str_info, 'i', False)
             return True
         else:
             str_info = "cmd_line fail: %s\n%s" % (cmd_string, str(command_out.stderr.read()))
@@ -222,21 +231,6 @@ def exec_cli(cmd_string, cwd=None, timeout=None, is_shell=False):
     except Exception, e:
         log_printer('cmd_line %s\nError info %s' % (cmd_string, str(e)), 'e', True)
         return False
-
-
-def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, branch=str):
-    if check_dir_or_file_is_exist(local_path):
-        clone_is_exists = '\n===\nClone project is exist path: \n%s\n===\n' % local_path
-        log_printer(clone_is_exists, 'i', True)
-    else:
-        cmd_line = 'git clone %s -b %s %s' % (project_url, branch, local_path)
-        exec_cli(cmd_line)
-    git_branch_check = 'git branch -v'
-    exec_cli(git_branch_check, local_path)
-    git_pull_head = 'git pull'
-    pull = exec_cli(git_pull_head, local_path)
-    if not pull:
-        exit(1)
 
 
 def read_json_config(json_path=str):
@@ -255,6 +249,21 @@ def read_json_config(json_path=str):
                 filter_project_config(project, build_path)
     except Exception, e:
         log_printer('Read json config file: ' + json_path + '\n' + str(e) + '\nError, exit!', 'e', True)
+        exit(1)
+
+
+def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, branch=str):
+    if check_dir_or_file_is_exist(local_path):
+        clone_is_exists = '\n===\nClone project is exist path: \n%s\n===\n' % local_path
+        log_printer(clone_is_exists, 'i', True)
+    else:
+        cmd_line = 'git clone %s -b %s %s' % (project_url, branch, local_path)
+        exec_cli(cmd_line, None, out_of_time_clone)
+    git_branch_check = 'git branch -v'
+    exec_cli(git_branch_check, local_path)
+    git_pull_head = 'git pull'
+    pull = exec_cli(git_pull_head, local_path, out_of_time_build)
+    if not pull:
         exit(1)
 
 
@@ -292,7 +301,6 @@ def build_project_at_module_by_task(local, module, task):
     if not check_dir_or_file_is_exist(gradlew_path):
         log_printer('Not found %s at PathL %s\exit 1' % (gradlew_tag, local), 'e', True)
         exit(1)
-    cmd_build = ''
     if is_platform_windows():
         cmd_build = '%s :%s:%s --refresh-dependencies' % (gradlew_tag, module, task)
     else:
@@ -300,7 +308,11 @@ def build_project_at_module_by_task(local, module, task):
     if is_verbose:
         cmd_build = '%s --info' % cmd_build
     print local
-    res = exec_cli(cmd_build, local)
+    res = exec_cli(cmd_build, local, out_of_time_build)
+    if res:
+        log_printer('=== Build success ===\nBuild cli:%s' % cmd_build, 'i', True)
+    else:
+        log_printer('=== Build Fail ===\nBuild cli:%s' % cmd_build, 'w', True)
 
 
 def filter_project_config(project, build_path=str):
@@ -317,7 +329,7 @@ def filter_project_config(project, build_path=str):
     mode_p = project['mode']
     git_clone_project_by_branch_and_try_pull(git_url_p, local_p, branch_p)
     check_project_version_info_at_gradle_properties(local_p, version_name_p, version_code_p)
-    build_project_at_module_by_task(local_p, module_p, task_p)
+    # build_project_at_module_by_task(local_p, module_p, task_p)
 
 
 if __name__ == '__main__':
