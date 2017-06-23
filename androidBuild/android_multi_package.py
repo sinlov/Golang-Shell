@@ -34,9 +34,9 @@ out_of_time_default = 60 * 1
 """
 out_of_time_clone = 60 * 10
 """
-执行单位构建超时时间 60 * 20 秒
+执行单位构建超时时间 60 * 50 秒
 """
-out_of_time_build = 60 * 20
+out_of_time_build = 60 * 50
 
 build_gradle_properties = 'gradle.properties'
 
@@ -155,7 +155,7 @@ def exec_cli_print_line(cli_line=str, cwd=None):
     :param cli_line: 执行命令
     :param cwd: 执行目录
     """
-    info = "cli line: %s\n" % cli_line
+    info = "=== cli line ===\n%s\n" % cli_line
     log_printer(info, 'i', True)
     res = subprocess.Popen(cli_line, cwd=None, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     str_info = "cmd_line: %s\n%s" % (cli_line, res.stdout.readline())
@@ -273,7 +273,7 @@ def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, br
         log_printer(clone_is_exists, 'i', True)
     else:
         cmd_line = 'git clone %s -b %s %s' % (project_url, branch, local_path)
-        exec_cli_print_line(cmd_line)
+        execute_cli(cmd_line, root_run_path, out_of_time_clone)
     git_branch_check = 'git branch -v'
     exec_cli_print_line(git_branch_check)
     git_pull_head = 'git pull'
@@ -305,6 +305,7 @@ def check_project_version_info_at_gradle_properties(local, version_name, version
         log_printer('Check version by gradle.properties success', 'i', True)
     else:
         log_printer('Check version by gradle.properties fail\nAt path %s!', 'w', True)
+        exit(1)
 
 
 def build_android_project_at_module_by_task(local, tasks):
@@ -318,17 +319,18 @@ def build_android_project_at_module_by_task(local, tasks):
     if not check_dir_or_file_is_exist(gradlew_path):
         log_printer('Not found %s at Path: %s\exit 1' % (gradlew_tag, local), 'e', True)
         exit(1)
-    task_list = ''
     if len(tasks) < 1:
         log_printer('You are not set any task please check config \exit 1\n', 'e', True)
         exit(1)
+    task_list = ''
     for task in tasks:
         task_unit = ':%s:%s' % (task['module'], task['task'])
-        task_list = '%s ' % task_unit
+        task_list = '%s%s ' % (task_list, task_unit)
+
     if is_platform_windows():
-        cmd_build = '%s %s--refresh-dependencies' % (gradlew_tag, task_list)
+        cmd_build = '%s clean %s--refresh-dependencies' % (gradlew_tag, task_list)
     else:
-        cmd_build = './%s %s--refresh-dependencies' % (gradlew_tag, task_list)
+        cmd_build = './%s clean %s--refresh-dependencies' % (gradlew_tag, task_list)
     if is_verbose:
         cmd_build = '%s --info' % cmd_build
     print local

@@ -2,6 +2,31 @@
   "build_path": "build",
   "build_projects": [
     {
+      "name": "CommonLib",
+      "git_url": "ssh://git@gitlab.shishike.com:38401/c_iphone/CommonLib.git",
+      "local": "CommonLib",
+      "branch": "main-develop",
+      "tag": "",
+      "version_name": "1.0.0-SNAPSHOT",
+      "version_code": "1000000",
+      "tasks": [
+        {
+          "module": "commonlibs",
+          "task": "clean"
+        },
+        {
+          "module": "commonlibs",
+          "task": "generateReleaseSources"
+        },
+        {
+          "module": "commonlibs",
+          "task": "uploadArchives"
+        }
+      ],
+      "mode": "debug",
+      "auto_clean": 1
+    },
+    {
       "name": "OsMobile",
       "git_url": "ssh://git@gitlab.shishike.com:38401/c_iphone/OSMobile.git",
       "local": "OsMobile",
@@ -13,6 +38,10 @@
         {
           "module": "app",
           "task": "clean"
+        },
+        {
+          "module": "app",
+          "task": "generateReleaseSources"
         }
       ],
       "mode": "debug",
