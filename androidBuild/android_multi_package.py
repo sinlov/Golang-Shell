@@ -8,6 +8,7 @@ import time
 import datetime
 import shlex
 import subprocess
+import shutil
 
 import logging
 import logging.handlers
@@ -91,7 +92,7 @@ def init_logger_by_time(tag=str):
 
 def log_printer(msg, lev=str, must=False):
     if is_verbose or must:
-        print msg
+        print msg,
     if lev == 'i':
         logger.info(msg)
     elif lev == 'd':
@@ -149,18 +150,20 @@ def replace_text(t_file=str, s_str=str, r_str=str):
         print e
 
 
-def exec_popen(cli_line=str):
-    """比较过时的执行命令的方法，只会捕获输出，打印到日志里面
+def exec_cli_print_line(cli_line=str, cwd=None):
+    """只会捕获输出，打印到日志里面
     :param cli_line: 执行命令
+    :param cwd: 执行目录
     """
-    res = os.popen(cli_line)
-    out_put = res.read()
-    str_info = "cmd_line: %s\n%s" % (cli_line, out_put)
+    info = "cli line: %s\n" % cli_line
+    log_printer(info, 'i', True)
+    res = subprocess.Popen(cli_line, cwd=None, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                           close_fds=True)
+    str_info = "cmd_line: %s\n%s" % (cli_line, res.stdout.readline())
     log_printer(str_info, 'i', True)
-    res.close()
 
 
-def execute_command(cli_string, cwd=None, timeout=None, is_shell=False, is_info=False):
+def execute_cli(cli_string, cwd=None, timeout=None, is_shell=False, is_info=False):
     """执行一个SHELL命令
         封装了subprocess的Popen方法, 支持超时判断，支持读取stdout和stderr
         如果没有指定标准输出和错误输出的管道，因此会打印到屏幕上
@@ -215,13 +218,13 @@ def exec_cli(cmd_string, cwd=None, time_out=None, is_shell=False):
     try:
         if time_out is None:
             time_out = out_of_time_default
-        if is_verbose:
-            print 'cli -> %s\ncwd -> %s\ntimeOut -> %s\nis_shell -> %s' % (cmd_string, cwd, time_out, is_shell)
-        command_out = execute_command(cmd_string, cwd, time_out, is_shell, True)
+        log_printer('\ncli -> %s\ncwd -> %s\ntimeOut -> %s\nis_shell -> %s\n' % (cmd_string, cwd, time_out, is_shell),
+                    'i', True)
+        command_out = execute_cli(cmd_string, cwd, time_out, is_shell, True)
         if command_out.returncode == 0:
             str_info = "cmd_line success: %s\n%s" % (cmd_string, str(command_out.stdout.read()))
             command_out.stdout.close()
-            log_printer(str_info, 'i', False)
+            log_printer(str_info, 'i', True)
             return True
         else:
             str_info = "cmd_line fail: %s\n%s" % (cmd_string, str(command_out.stderr.read()))
@@ -233,20 +236,33 @@ def exec_cli(cmd_string, cwd=None, time_out=None, is_shell=False):
         return False
 
 
+def read_json_file(js_path=str):
+    if not os.path.exists(js_path):
+        log_printer("can not find json file, exit!", 'e', True)
+        exit(1)
+    try:
+        with open(js_path, 'r') as load_js:
+            js = json.load(load_js)
+        return js
+    except Exception, e:
+        log_printer('Read json config file: ' + js_path + '\n' + str(e) + '\nError, exit!', 'e', True)
+        exit(1)
+
+
 def read_json_config(json_path=str):
     if not os.path.exists(json_path):
         log_printer("can not find json config, exit!", 'e', True)
         exit(1)
     try:
         with open(json_path, 'r') as load_js:
-            js = json.load(load_js)
-            build_path = js['build_path']
-            build_path = os.path.join(root_run_path, build_path)
-            if not check_dir_or_file_is_exist(build_path):
-                os.mkdir(build_path)
-            build_projects = js['build_projects']
+            config_js = json.load(load_js)
+            js_build_path = config_js['build_path']
+            js_build_path = os.path.join(root_run_path, js_build_path)
+            if not check_dir_or_file_is_exist(js_build_path):
+                os.mkdir(js_build_path)
+            build_projects = config_js['build_projects']
             for project in build_projects:
-                filter_project_config(project, build_path)
+                filter_project_config(project, js_build_path)
     except Exception, e:
         log_printer('Read json config file: ' + json_path + '\n' + str(e) + '\nError, exit!', 'e', True)
         exit(1)
@@ -258,12 +274,14 @@ def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, br
         log_printer(clone_is_exists, 'i', True)
     else:
         cmd_line = 'git clone %s -b %s %s' % (project_url, branch, local_path)
-        exec_cli(cmd_line, None, out_of_time_clone)
+        exec_cli_print_line(cmd_line)
     git_branch_check = 'git branch -v'
-    exec_cli(git_branch_check, local_path)
+    exec_cli_print_line(git_branch_check)
     git_pull_head = 'git pull'
-    pull = exec_cli(git_pull_head, local_path, out_of_time_build)
-    if not pull:
+    exec_cli_print_line(git_pull_head, local_path)
+    gs_cmd = 'git status'
+    gs = exec_cli(gs_cmd, local_path)
+    if not gs:
         exit(1)
 
 
@@ -290,7 +308,7 @@ def check_project_version_info_at_gradle_properties(local, version_name, version
         log_printer('Check version by gradle.properties fail\nAt path %s!', 'w', True)
 
 
-def build_project_at_module_by_task(local, module, task):
+def build_android_project_at_module_by_task(local, tasks):
     if not check_dir_or_file_is_exist(local):
         log_printer('Not found path: %s\exit 1' % local, 'e', True)
         exit(1)
@@ -299,20 +317,39 @@ def build_project_at_module_by_task(local, module, task):
         gradlew_tag = 'gradlew.bat'
     gradlew_path = os.path.join(local, gradlew_tag)
     if not check_dir_or_file_is_exist(gradlew_path):
-        log_printer('Not found %s at PathL %s\exit 1' % (gradlew_tag, local), 'e', True)
+        log_printer('Not found %s at Path: %s\exit 1' % (gradlew_tag, local), 'e', True)
         exit(1)
+    task_list = ''
+    if len(tasks) < 1:
+        log_printer('You are not set any task please check config \exit 1\n', 'e', True)
+        exit(1)
+    for task in tasks:
+        task_unit = ':%s:%s' % (task['module'], task['task'])
+        task_list = '%s ' % task_unit
     if is_platform_windows():
-        cmd_build = '%s :%s:%s --refresh-dependencies' % (gradlew_tag, module, task)
+        cmd_build = '%s %s--refresh-dependencies' % (gradlew_tag, task_list)
     else:
-        cmd_build = './%s :%s:%s --refresh-dependencies' % (gradlew_tag, module, task)
+        cmd_build = './%s %s--refresh-dependencies' % (gradlew_tag, task_list)
     if is_verbose:
         cmd_build = '%s --info' % cmd_build
     print local
     res = exec_cli(cmd_build, local, out_of_time_build)
     if res:
-        log_printer('=== Build success ===\nBuild cli:%s' % cmd_build, 'i', True)
+        log_printer('\n=== project build success ===\nBuild cli:%s\n=== project build success ===\n' % cmd_build, 'i',
+                    True)
     else:
-        log_printer('=== Build Fail ===\nBuild cli:%s' % cmd_build, 'w', True)
+        log_printer('\n=== project build fail ===\nBuild cli:%s\n=== project build fail ===\n' % cmd_build, 'w', True)
+
+
+def auto_clean_build_project(local=str):
+    if not check_dir_or_file_is_exist(local):
+        log_printer('Not found path: %s\exit 1' % local, 'e', True)
+        exit(1)
+    change_files_write(local)
+    time.sleep(1)
+    shutil.rmtree(local, True)
+    time.sleep(1)
+    log_printer('Auto clean success path: %s' % local, 'i', True)
 
 
 def filter_project_config(project, build_path=str):
@@ -322,14 +359,17 @@ def filter_project_config(project, build_path=str):
     local_p = os.path.join(build_path, local_p)
     branch_p = project['branch']
     tag_p = project['tag']
-    module_p = project['module']
     version_name_p = project['version_name']
     version_code_p = project['version_code']
-    task_p = project['task']
+    tasks_p = project['tasks']
     mode_p = project['mode']
+    auto_clean_p = project['auto_clean']
     git_clone_project_by_branch_and_try_pull(git_url_p, local_p, branch_p)
     check_project_version_info_at_gradle_properties(local_p, version_name_p, version_code_p)
-    # build_project_at_module_by_task(local_p, module_p, task_p)
+
+    build_android_project_at_module_by_task(local_p, tasks_p)
+    if auto_clean_p != 0:
+        auto_clean_build_project(local_p)
 
 
 if __name__ == '__main__':
@@ -340,18 +380,33 @@ if __name__ == '__main__':
     if not check_p.startswith('-'):
         print 'You params is error please see -h'
         exit(1)
-    logger = init_logger_by_time(this_tag)
     parser = optparse.OptionParser('Usage %prog ' + '-i -v')
     parser.add_option('-v', '--verbose', dest='v_verbose', action="store_true",
                       help="see verbose", default=False)
     parser.add_option('--config', dest='config', type="string",
                       help="build config json file if not set use run path build.json"
                       , metavar="build.json")
+    parser.add_option('-c', '--clean', dest='c_clean', action="store_true",
+                      help="clean you set build_path ", default=False)
+    parser.add_option('-f', '--force', dest='f_force', action="store_true",
+                      help="force build not set check", default=False)
     (options, args) = parser.parse_args()
+    logger = init_logger_by_time(this_tag)
     if options.v_verbose:
         is_verbose = True
     config_file_path = os.path.join(root_run_path, "build.json")
     if options.config:
         config_file_path = options.config
-    log_printer('load config path at ' + config_file_path)
-    read_json_config(config_file_path)
+    log_printer('Load config path at: %s\n' % config_file_path, 'i', True)
+    if options.c_clean:
+        js = read_json_file(config_file_path)
+        build_path = js['build_path']
+        build_path = os.path.join(root_run_path, build_path)
+        change_files_write(build_path)
+        time.sleep(1)
+        shutil.rmtree(build_path, True)
+        time.sleep(1)
+        log_printer('Clean success : %s' % build_path, 'i', True)
+        exit(0)
+    if options.f_force:
+        read_json_config(config_file_path)

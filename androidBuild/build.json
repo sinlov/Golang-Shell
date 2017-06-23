@@ -7,11 +7,16 @@
       "local": "OsMobile",
       "branch": "main-develop",
       "tag": "",
-      "module": "app",
       "version_name": "V1.4.0-SNAPSHOT",
       "version_code": "2110010400",
-      "task": "clean",
+      "tasks": [
+        {
+          "module": "app",
+          "task": "clean"
+        }
+      ],
       "mode": "debug",
+      "auto_clean": 1,
       "args": [
         {
           "replace_gradle_properties": [
