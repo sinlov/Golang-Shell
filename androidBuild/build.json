@@ -2,38 +2,13 @@
   "build_path": "build",
   "build_projects": [
     {
-      "name": "CommonLib",
-      "git_url": "ssh://git@gitlab.shishike.com:38401/c_iphone/CommonLib.git",
-      "local": "CommonLib",
-      "branch": "main-develop",
+      "name": "Android-Temp",
+      "git_url": "git@github.com:MDL-Sinlov/MDL_Android-Temp.git",
+      "local": "Android-Temp",
+      "branch": "master",
       "tag": "",
-      "version_name": "1.0.0-SNAPSHOT",
-      "version_code": "1000000",
-      "tasks": [
-        {
-          "module": "commonlibs",
-          "task": "clean"
-        },
-        {
-          "module": "commonlibs",
-          "task": "generateReleaseSources"
-        },
-        {
-          "module": "commonlibs",
-          "task": "uploadArchives"
-        }
-      ],
-      "mode": "debug",
-      "auto_clean": 1
-    },
-    {
-      "name": "OsMobile",
-      "git_url": "ssh://git@gitlab.shishike.com:38401/c_iphone/OSMobile.git",
-      "local": "OsMobile",
-      "branch": "main-develop",
-      "tag": "",
-      "version_name": "V1.4.0-SNAPSHOT",
-      "version_code": "2110010400",
+      "version_name": "0.0.1",
+      "version_code": "1",
       "tasks": [
         {
           "module": "app",
@@ -51,23 +26,18 @@
           "replace_gradle_properties": [
             {
               "name": "VERSION_NAME",
-              "from": "V1.4.0-SNAPSHOT",
-              "to": "V1.4.0-SNAPSHOT"
+              "from": "0.0.1",
+              "to": "1.0.0"
             },
             {
               "name": "VERSION_CODE",
-              "from": "2110010400",
-              "to": "2110010400"
+              "from": "1",
+              "to": "1000000"
             },
             {
               "name": "NEXUS_RELEASE",
-              "from": "http://nexus.shishike.com/nexus/content/repositories/releases/",
-              "to": "http://nexus.shishike.com/nexus/content/repositories/releases/"
-            },
-            {
-              "name": "NEXUS_SNAPSHOT",
-              "from": "http://nexus.shishike.com/nexus/content/repositories/snapshots/",
-              "to": "http://nexus.shishike.com/nexus/content/repositories/snapshots/"
+              "from": "file:///Users/sinlov/Documents/GitHub/MDL_Sinlov/MDL-Android-Repo/mvn-repo/",
+              "to": "file:///Users/sinlov/Downloads/mvn-repo/release"
             }
           ]
         }
