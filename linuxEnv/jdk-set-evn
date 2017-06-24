@@ -17,7 +17,7 @@ if [ ! -d "${jdkInstallPath}" ]; then
   exit 1
 fi
 
-echo -e "This script set event of java!
+echo -e "This script set event of jdk!
 Env set file path: ${set_path_file}
 JAVA_HOME -> ${jdkInstallPath}
 \n"
@@ -31,11 +31,12 @@ fi
 
 cat >> "${set_path_file}" << EOF
 
-# set java environment
+# set jdk environment
 export JAVA_HOME=${jdkInstallPath}
 export PATH=\$JAVA_HOME/bin:\$PATH
 export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar
 EOF
 echo -e "jdk evn set at ${set_path_file}
-You can change by your self or load path by
-source ${set_path_file}"
+You can change by your self vim ${set_path_file}
+load path by source ${set_path_file}"
+
