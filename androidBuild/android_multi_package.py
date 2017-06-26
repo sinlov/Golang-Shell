@@ -30,13 +30,13 @@ this_tag = 'android_multi_build_'
 """
 out_of_time_default = 60 * 1
 """
-执行单位克隆超时时间 60 * 10 秒
+执行单位克隆超时时间 60 * 30 秒
 """
-out_of_time_clone = 60 * 10
+out_of_time_clone = 60 * 30
 """
-执行单位构建超时时间 60 * 50 秒
+执行单位构建超时时间 60 * 20 秒
 """
-out_of_time_build = 60 * 50
+out_of_time_build = 60 * 20
 
 build_gradle_properties = 'gradle.properties'
 
@@ -87,10 +87,12 @@ def init_logger(first_tag, sec_tag=str):
 
 
 def init_logger_by_time(tag=str):
+    # type: (str) -> Logger
     return init_logger(tag, find_now_time_format('%Y_%m_%d_%H_%M_%S'))
 
 
 def log_printer(msg, lev=str, must=False):
+    # type: (str, str, bool) -> None
     if is_verbose or must:
         print msg,
     if lev == 'i':
@@ -118,6 +120,7 @@ def check_dir_or_file_is_exist(abs_path=str):
 
 
 def change_files_write(path=str):
+    # type: (str) -> None
     for root, dirs, files in os.walk(path):
         for name in files:
             os.chmod(os.path.join(root, name), stat.S_IWRITE)
@@ -151,6 +154,7 @@ def replace_text(t_file=str, s_str=str, r_str=str):
 
 
 def exec_cli_print_line(cli_line=str, cwd=None):
+    # type: (str, str) -> None
     """只会捕获输出，打印到日志里面
     :param cli_line: 执行命令
     :param cwd: 执行目录
@@ -244,11 +248,12 @@ def read_json_file(js_path=str):
             js = json.load(load_js)
         return js
     except Exception, e:
-        log_printer('Read json config file: ' + js_path + '\n' + str(e) + '\nError, exit!', 'e', True)
+        log_printer('Read json file: %s\n%s\nError, exit!' % (js_path, str(e)), 'e', True)
         exit(1)
 
 
 def read_json_config(json_path=str):
+    # type: (str) -> None
     if not os.path.exists(json_path):
         log_printer("can not find json config, exit!", 'e', True)
         exit(1)
@@ -263,7 +268,7 @@ def read_json_config(json_path=str):
             for project in build_projects:
                 filter_project_config(project, js_build_path)
     except Exception, e:
-        log_printer('Read json config file: ' + json_path + '\n' + str(e) + '\nError, exit!', 'e', True)
+        log_printer('Read json config file: %s\n%s\nError, exit!' % (json_path, str(e)), 'e', True)
         exit(1)
 
 
@@ -308,7 +313,7 @@ def check_project_version_info_at_gradle_properties(local, version_name, version
         exit(1)
 
 
-def build_android_project_at_module_by_task(local, tasks):
+def check_gradle_wrapper(local):
     if not check_dir_or_file_is_exist(local):
         log_printer('Not found path: %s\exit 1' % local, 'e', True)
         exit(1)
@@ -322,28 +327,48 @@ def build_android_project_at_module_by_task(local, tasks):
     if not is_platform_windows():
         gradlew_exec = 'chmod +x %s' % gradlew_tag
         exec_cli(gradlew_exec, local, out_of_time_default, True)
-    if len(tasks) < 1:
-        log_printer('You are not set any task please check config \exit 1\n', 'e', True)
-        exit(1)
-    task_list = ''
-    for task in tasks:
-        task_unit = ':%s:%s' % (task['module'], task['task'])
-        task_list = '%s%s ' % (task_list, task_unit)
+    return gradlew_tag
 
+
+def run_single_gradle_task(local, gradlew_tag, task, info=False, refresh_dependencies=False):
     if is_platform_windows():
-        cmd_build = '%s clean %s--refresh-dependencies' % (gradlew_tag, task_list)
+        cmd_build = '%s %s' % (gradlew_tag, task)
     else:
-        cmd_build = './%s clean %s--refresh-dependencies' % (gradlew_tag, task_list)
-    if is_verbose:
+        cmd_build = './%s %s' % (gradlew_tag, task)
+    if refresh_dependencies:
+        cmd_build = '%s --refresh-dependencies' % cmd_build
+    if info:
         cmd_build = '%s --info' % cmd_build
-    print local
     res = exec_cli(cmd_build, local, out_of_time_build)
     if res:
         log_printer('\n=== project build success ===\nBuild cli:%s\n=== project build success ===\n' % cmd_build, 'i',
                     True)
+        return True
     else:
         log_printer('\n=== project build fail ===\nBuild cli:%s\n=== project build fail ===\n' % cmd_build, 'w', True)
-        os._exit(1)
+        return False
+
+
+def build_android_project_at_module_by_task(local, tasks):
+    gradlew_tag = check_gradle_wrapper(local)
+    if len(tasks) < 1:
+        log_printer('You are not set any task please check config \exit 1\n', 'e', True)
+        exit(1)
+    for task in tasks:
+        module_task = task['module']
+        task_task = task['task']
+        if module_task == 'projectRoot':
+            task_unit = '%s' % task_task
+        else:
+            task_unit = ':%s:%s' % (module_task, task_task)
+        if 'need_refresh_depend' in task.keys():
+            res_task = run_single_gradle_task(local, gradlew_tag, task_unit, is_verbose, True)
+        else:
+            res_task = run_single_gradle_task(local, gradlew_tag, task_unit, is_verbose)
+        if not res_task:
+            return False
+        else:
+            continue
 
 
 def auto_clean_build_project(local=str):
@@ -372,7 +397,9 @@ def filter_project_config(project, build_path=str):
     git_clone_project_by_branch_and_try_pull(git_url_p, local_p, branch_p)
     check_project_version_info_at_gradle_properties(local_p, version_name_p, version_code_p)
 
-    build_android_project_at_module_by_task(local_p, tasks_p)
+    task_res = build_android_project_at_module_by_task(local_p, tasks_p)
+    if not task_res:
+        exit(1)
     if auto_clean_p != 0:
         auto_clean_build_project(local_p)
 

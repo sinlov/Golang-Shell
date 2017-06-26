@@ -11,12 +11,17 @@
       "version_code": "1",
       "tasks": [
         {
-          "module": "app",
-          "task": "clean"
+          "module": "projectRoot",
+          "task": "clean",
+          "need_refresh_depend": 1
+        },
+        {
+          "module": "ux",
+          "task": "generateReleaseSources"
         },
         {
           "module": "app",
-          "task": "generateReleaseSources"
+          "task": "assembleRelease"
         }
       ],
       "mode": "debug",
