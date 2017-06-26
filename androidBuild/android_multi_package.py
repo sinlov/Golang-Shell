@@ -367,8 +367,7 @@ def build_android_project_at_module_by_task(local, tasks):
             res_task = run_single_gradle_task(local, gradlew_tag, task_unit, is_verbose)
         if not res_task:
             return False
-        else:
-            continue
+    return True
 
 
 def auto_clean_build_project(local=str):
