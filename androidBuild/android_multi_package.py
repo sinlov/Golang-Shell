@@ -153,19 +153,6 @@ def replace_text(t_file=str, s_str=str, r_str=str):
         print e
 
 
-def exec_cli_print_line(cli_line=str, cwd=None):
-    # type: (str, str) -> None
-    """只会捕获输出，打印到日志里面
-    :param cli_line: 执行命令
-    :param cwd: 执行目录
-    """
-    info = "=== cli line ===\n%s\n" % cli_line
-    log_printer(info, 'i', True)
-    res = subprocess.Popen(cli_line, cwd=None, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    str_info = "cmd_line: %s\n%s" % (cli_line, res.stdout.readline())
-    log_printer(str_info, 'i', True)
-
-
 def execute_cli(cli_string, cwd=None, timeout=None, is_shell=False, is_info=False):
     """执行一个SHELL命令
         封装了subprocess的Popen方法, 支持超时判断，支持读取stdout和stderr
@@ -225,14 +212,16 @@ def exec_cli(cmd_string, cwd=None, time_out=None, is_shell=False):
                     'i', True)
         command_out = execute_cli(cmd_string, cwd, time_out, is_shell, True)
         if command_out.returncode == 0:
-            str_info = "cmd_line success: %s\n%s" % (cmd_string, str(command_out.stdout.read()))
+            str_err = "cmd_line success: %s\n%s" % (cmd_string, str(command_out.stdout.read()))
             command_out.stdout.close()
-            log_printer(str_info, 'i', True)
+            log_printer(str_err, 'i', True)
             return True
         else:
-            str_info = "cmd_line fail: %s\n%s" % (cmd_string, str(command_out.stderr.read()))
+            str_out = "cmd_line fail out: %s\n%s" % (cmd_string, str(command_out.stdout.read()))
+            str_err = "cmd_line fail: %s\n%s" % (cmd_string, str(command_out.stderr.read()))
+            command_out.stdout.close()
             command_out.stderr.close()
-            log_printer(str_info, 'e', True)
+            log_printer('%s\n%s' % (str_out, str_err), 'e', True)
             return False
     except Exception, e:
         log_printer('cmd_line %s\nError info %s' % (cmd_string, str(e)), 'e', True)
@@ -277,12 +266,14 @@ def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, br
         clone_is_exists = '\n===\nClone project is exist path: \n%s\n===\n' % local_path
         log_printer(clone_is_exists, 'i', True)
     else:
-        cmd_line = 'git clone %s -b %s %s' % (project_url, branch, local_path)
-        exec_cli_print_line(cmd_line)
+        cmd_line = 'git clone %s -b %s %s' % (project_url, branch, '\"%s\"' % local_path)
+        clone_res = exec_cli(cmd_line, root_run_path, out_of_time_clone)
+        if not clone_res:
+            exit(1)
     git_branch_check = 'git branch -v'
-    exec_cli_print_line(git_branch_check)
+    exec_cli(git_branch_check, local_path)
     git_pull_head = 'git pull'
-    exec_cli_print_line(git_pull_head, local_path)
+    exec_cli(git_pull_head, local_path)
     gs_cmd = 'git status'
     gs = exec_cli(gs_cmd, local_path)
     if not gs:
