@@ -13,7 +13,7 @@ volume path: ${nexus_data}
 "
 
 if [ ! -d "${nexus_data}" ]; then
-	echo "volume path: ${nexus_data}\nIs not exist just mkdir"
+	echo -e "volume path: ${nexus_data}\nIs not exist just mkdir"
 	mkdir -p ${nexus_data}
 	chown -R 200 ${nexus_data}
 fi
