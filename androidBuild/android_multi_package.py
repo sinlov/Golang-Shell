@@ -261,7 +261,7 @@ def read_json_config(json_path=str):
         exit(1)
 
 
-def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, branch=str):
+def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, branch=str, tag=str):
     if check_dir_or_file_is_exist(local_path):
         clone_is_exists = '\n===\nClone project is exist path: \n%s\n===\n' % local_path
         log_printer(clone_is_exists, 'i', True)
@@ -301,7 +301,7 @@ def check_project_version_info_at_gradle_properties(local, version_name, version
         log_printer('Check version by gradle.properties success', 'i', True)
     else:
         log_printer('Check version by gradle.properties fail\nAt path %s!', 'w', True)
-        exit(1)
+        # exit(1)
 
 
 def check_gradle_wrapper(local):
@@ -372,21 +372,38 @@ def auto_clean_build_project(local=str):
     log_printer('Auto clean success path: %s' % local, 'i', True)
 
 
+def replace_gradle_properties(local, replace_properties):
+    for walk_dir, walk_folder, walk_file in os.walk(local):
+        for f in walk_file:
+            if f.endswith('gradle.properties'):
+                gradle_p_path = os.path.join(walk_dir, f)
+                print gradle_p_path
+                for rgp in replace_properties:
+                    replace_text(gradle_p_path, rgp['from'], rgp['to'])
+
+
 def filter_project_config(project, build_path=str):
     name_p = project['name']
     git_url_p = project['git_url']
     local_p = project['local']
     local_p = os.path.join(build_path, local_p)
     branch_p = project['branch']
-    tag_p = project['tag']
     version_name_p = project['version_name']
     version_code_p = project['version_code']
     tasks_p = project['tasks']
-    mode_p = project['mode']
     auto_clean_p = project['auto_clean']
-    git_clone_project_by_branch_and_try_pull(git_url_p, local_p, branch_p)
+    if 'tag' in project.keys():
+        tag_p = project['tag']
+        git_clone_project_by_branch_and_try_pull(git_url_p, local_p, branch_p, tag_p)
+    else:
+        git_clone_project_by_branch_and_try_pull(git_url_p, local_p, branch_p)
     check_project_version_info_at_gradle_properties(local_p, version_name_p, version_code_p)
-
+    if 'args' in project.keys():
+        args_dirs = project['args']
+        for args_dir in args_dirs:
+            if 'replace_gradle_properties' in args_dir.keys():
+                rgp_properties = args_dir['replace_gradle_properties']
+                replace_gradle_properties(local_p, rgp_properties)
     task_res = build_android_project_at_module_by_task(local_p, tasks_p)
     if not task_res:
         exit(1)
