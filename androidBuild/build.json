@@ -6,7 +6,7 @@
       "git_url": "git@github.com:MDL-Sinlov/MDL_Android-Temp.git",
       "local": "Android-Temp",
       "branch": "master",
-      "tag": "",
+      "tag": "0.0.1",
       "version_name": "0.0.1",
       "version_code": "1",
       "tasks": [

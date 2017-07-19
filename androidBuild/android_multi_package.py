@@ -261,19 +261,38 @@ def read_json_config(json_path=str):
         exit(1)
 
 
-def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, branch=str, tag=str):
+def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, branch='', tag=''):
+    if not branch.strip():
+        branch = 'master'
     if check_dir_or_file_is_exist(local_path):
         clone_is_exists = '\n===\nClone project is exist path: \n%s\n===\n' % local_path
         log_printer(clone_is_exists, 'i', True)
+        if tag.strip():
+            auto_clean_build_project(local_path)
+            tag_mode_remove_old_if_exist = '\n===\nBecause config tag so must delete old local path: \n%s\n===\n' % local_path
+            log_printer(tag_mode_remove_old_if_exist, 'i', True)
+            cmd_line = 'git clone %s -b %s %s' % (project_url, branch, '\"%s\"' % local_path)
+            clone_res = exec_cli(cmd_line, root_run_path, out_of_time_clone)
+            if not clone_res:
+                exit(1)
+            git_tag_checkout = 'git checkout %s' % tag
+            clone_res = exec_cli(git_tag_checkout, local_path, out_of_time_clone)
+            if not clone_res:
+                exit(1)
     else:
         cmd_line = 'git clone %s -b %s %s' % (project_url, branch, '\"%s\"' % local_path)
         clone_res = exec_cli(cmd_line, root_run_path, out_of_time_clone)
         if not clone_res:
             exit(1)
+        if tag.strip():
+            git_tag_checkout = 'git checkout %s' % tag
+            clone_res = exec_cli(git_tag_checkout, local_path, out_of_time_clone)
+            if not clone_res:
+                exit(1)
     git_branch_check = 'git branch -v'
     exec_cli(git_branch_check, local_path)
-    git_pull_head = 'git pull'
-    exec_cli(git_pull_head, local_path)
+    git_fetch = 'git fetch -v'
+    exec_cli(git_fetch, local_path)
     gs_cmd = 'git status'
     gs = exec_cli(gs_cmd, local_path)
     if not gs:
@@ -384,14 +403,50 @@ def replace_gradle_properties(local, replace_properties):
 
 def filter_project_config(project, build_path=str):
     name_p = project['name']
-    git_url_p = project['git_url']
-    local_p = project['local']
+    if 'git_url' in project:
+        git_url_p = project['git_url']
+    else:
+        git_url_p = ''
+        log_printer('not set [ git_url ] exit!', 'e', True)
+        exit(1)
+    if 'local' in project:
+        local_p = project['local']
+    else:
+        local_p = ''
+        log_printer('not set [ local ] exit!', 'e', True)
+        exit(1)
     local_p = os.path.join(build_path, local_p)
-    branch_p = project['branch']
-    version_name_p = project['version_name']
-    version_code_p = project['version_code']
-    tasks_p = project['tasks']
-    auto_clean_p = project['auto_clean']
+    if 'branch' in project.keys():
+        branch_p = project['branch']
+    else:
+        branch_p = 'master'
+        log_printer('not set [ branch ] default is: %s' % branch_p, 'i', True)
+    if 'version_name' in project:
+        version_name_p = project['version_name']
+    else:
+        version_name_p = ''
+        log_printer('not set [ version_name ] exit!', 'e', True)
+        exit(1)
+    if 'version_code' in project:
+        version_code_p = project['version_code']
+    else:
+        version_code_p = ''
+        log_printer('not set [ version_code ] exit!', 'e', True)
+        exit(1)
+    if 'tasks' in project:
+        tasks_p = project['tasks']
+        if len(tasks_p) == 0:
+            log_printer('[ tasks ] size is 0, exit!', 'e', True)
+            exit(1)
+    else:
+        tasks_p = ''
+        log_printer('not set [ tasks ] exit!', 'e', True)
+        exit(1)
+    if 'auto_clean' in project:
+        auto_clean_p = project['auto_clean']
+    else:
+        log_printer('not set [ auto_clean ] default is: 0', 'i', True)
+        auto_clean_p = 0
     if 'tag' in project.keys():
         tag_p = project['tag']
         git_clone_project_by_branch_and_try_pull(git_url_p, local_p, branch_p, tag_p)
@@ -400,9 +455,15 @@ def filter_project_config(project, build_path=str):
     check_project_version_info_at_gradle_properties(local_p, version_name_p, version_code_p)
     if 'args' in project.keys():
         args_dirs = project['args']
+        if len(args_dirs) == 0:
+            log_printer('[ args ] size is 0, exit!', 'e', True)
+            exit(1)
         for args_dir in args_dirs:
             if 'replace_gradle_properties' in args_dir.keys():
                 rgp_properties = args_dir['replace_gradle_properties']
+                if len(rgp_properties) == 0:
+                    log_printer('[ replace_gradle_properties ] size is 0, exit!', 'e', True)
+                    exit(1)
                 replace_gradle_properties(local_p, rgp_properties)
     task_res = build_android_project_at_module_by_task(local_p, tasks_p)
     if not task_res:
