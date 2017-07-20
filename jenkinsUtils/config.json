@@ -1,0 +1,33 @@
+{
+  "download_path": "download",
+  "download_projects": [
+    {
+      "name": "OsMobile_Android_Zhengshi_New",
+      "jenkins_url": "http://172.16.1.231:18008/jenkins",
+      "jenkins_group": "Os%20Mobile",
+      "build_history": [
+        {
+          "build_num": 0,
+          "build_type": "artifact"
+        }
+      ],
+      "auto_clean": 0,
+      "args": [
+        {
+          "replace_download_file_name": [
+            {
+              "name": "VERSION_NAME",
+              "from": "0.0.1",
+              "to": "1.0.0"
+            },
+            {
+              "name": "VERSION_CODE",
+              "from": "1",
+              "to": "1000000"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

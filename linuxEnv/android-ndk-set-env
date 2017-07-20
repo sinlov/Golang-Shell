@@ -19,7 +19,7 @@ fi
 
 echo -e "This script set event of java!
 Env set file path: ${set_path_file}
-JAVA_HOME -> ${androidNDKInstallPath}
+ANDROID_NDK_HOME -> ${androidNDKInstallPath}
 \n"
 
 if [ ! -f "${set_path_file}" ]; then
