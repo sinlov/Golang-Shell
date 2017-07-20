@@ -1,6 +1,6 @@
 #!/bin/bash
 
-jdk_8_file_name="jdk-8u141-linux-x64.tag.gz"
+jdk_8_file_name="jdk-8u141-linux-x64.tar.gz"
 jdk_8_path_shot="jdk1.8.0_141"
 
 jdk_8_install_path_head="$HOME/opt/"
