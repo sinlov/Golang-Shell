@@ -27,3 +27,5 @@ echo -e "You can use
 http://127.0.0.1:${host_port}/nexus/
 To see!
 "
+
+echo "run with sudo docker start ${docker_name}"

@@ -22,10 +22,21 @@ if [ ! -d "${gogs_data}" ]; then
 	mkdir -p ${gogs_data}
 	chown -R 200 ${gogs_data}
 	chmod -R 466 ${gogs_data}
+else
+    echo -e "Find older gogs dir: ${gogs_data}\nJust use older."
 fi
 
-echo -e "just try run gogs as docker"
+echo -e "just try create gogs as docker"
 
 docker create -it --name ${docker_name} -p ${host_ssh_port}:22 -p ${host_port}:3000 -v ${gogs_data}:/data --link ${mysql_docker_name}:mysql gogs/gogs
 
-echo "create success see at sudo docker ps -a"
+echo "create [ ${docker_name} ] success see at sudo docker ps -a"
+
+echo -e "If want config
+- connect db use ${mysql_docker_name}:port
+- http port use inner port [ 3000 ] not ${host_port}
+- ssh port use outer port [ ${host_ssh_port} ]
+- do not use inner ssh mode!
+"
+
+echo "run with sudo docker start ${docker_name}"

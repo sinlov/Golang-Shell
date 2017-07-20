@@ -27,3 +27,4 @@ docker create -d -e MYSQL_ROOT_PASSWORD=${mysql_root_pwd} --name ${docker_name} 
 #docker run -d -e MYSQL_ROOT_PASSWORD=${mysql_root_pwd} --name ${docker_name} -v ${mysql_data}/my.cnf:/etc/mysql/my.cnf -v ${mysql_data}/data:/var/lib/mysql -p ${host_port}:3306 mysql
 
 echo "create success see at sudo docker ps -a"
+echo "run with sudo docker start ${docker_name}"
