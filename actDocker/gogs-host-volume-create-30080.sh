@@ -7,6 +7,7 @@ docker_name="gogs"
 host_port="30080"
 host_ssh_port="30022"
 mysql_docker_name="mysql-gogs"
+mysql_docker_net="mysql57"
 gogs_data="${HOME}/var/gogs"
 
 echo -e "this script run gogs evn
@@ -14,6 +15,7 @@ name: ${docker_name}
 host port: ${host_port}
 host ssh port: ${host_ssh_port}
 mysql docker name: ${mysql_docker_name}
+mysql docker net: ${mysql_docker_net}
 volume path: ${gogs_data}
 "
 
@@ -26,11 +28,11 @@ else
     echo -e "Find older gogs dir: ${gogs_data}\nJust use older."
 fi
 
-echo -e "just try create gogs as docker"
+echo -e "\nJust try create gogs as docker"
 
-docker create -it --name ${docker_name} -p ${host_ssh_port}:22 -p ${host_port}:3000 -v ${gogs_data}:/data --link ${mysql_docker_name}:mysql gogs/gogs
+docker create -it --name ${docker_name} -p ${host_ssh_port}:22 -p ${host_port}:3000 -v ${gogs_data}:/data --link ${mysql_docker_name}:${mysql_docker_net} gogs/gogs
 
-echo "create [ ${docker_name} ] success see at sudo docker ps -a"
+echo -e "create [ ${docker_name} ] success see at -> sudo docker ps -a\n"
 
 echo -e "If want config
 - connect db use ${mysql_docker_name}:port
