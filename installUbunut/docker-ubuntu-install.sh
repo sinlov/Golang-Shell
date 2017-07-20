@@ -4,4 +4,5 @@ sudo apt-get update
 sudo apt-get install docker.io
 which pip
 pip -V
-sudo pip install docker-compose
+sudo -H pip install docker-compose
+docker-compose version
