@@ -1,16 +1,35 @@
 #!/bin/bash
 
-jdk_8_download_url="http://download.oracle.com/otn-pub/java/jdk/8u141-b15/336fa29ff2bb4ef291e347e091f7f4a7/jdk-8u141-linux-x64.tar.gz"
 jdk_8_file_name="jdk-8u141-linux-x64.tag.gz"
 jdk_8_path_shot="jdk-8u141-linux-x64"
 
 jdk_8_install_path_head="$HOME/opt/"
 set_path_file="$HOME/.bash_profile"
 
-curl -O "${jdk_8_download_url}"
+checkFuncBack(){
+  if [ $? -eq 0 ]; then
+    echo "$1 checked"
+  else
+    echo "$1 check error exit"
+    exit 1
+  fi
+}
 
-tar zxvf "${jdk_8_file_name}"
-mv "${jdk_8_install_path_head}" "${jdk_8_path_shot}"
+echo "this script need use ${jdk_8_file_name} at now folder:"
+pwd
+
+if [ ! -f "./${jdk_8_file_name}" ]; then
+    echo -e "Error can not find jdk install file ${jdk_8_file_name}"
+    echo "you can download by http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html"
+    echo "Error exit !"
+    exit 1
+fi
+
+tar zxvf "./${jdk_8_file_name}"
+checkFuncBack "tar unzip ./${jdk_8_file_name}"
+
+mv "./${jdk_8_path_shot}" "${jdk_8_install_path_head}"
+checkFuncBack "mv ./${jdk_8_path_shot} ${jdk_8_install_path_head}"
 
 jdkInstallPath="${jdk_8_install_path_head}/${jdk_8_path_shot}"
 
