@@ -1,4 +1,9 @@
 version: '2'
+networks:
+  default:
+    # Use a custom driver
+    driver: custom-driver-1
+
 services:
   nginx:
     container_name: "nginx"
