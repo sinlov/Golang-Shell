@@ -32,6 +32,9 @@ if [ -d "${jdk_8_path_shot}" ]; then
     exit 1
 fi
 
+which tar
+checkFuncBack "check if have unzip tar"
+
 tar zxvf "./${jdk_8_file_name}"
 checkFuncBack "tar unzip ./${jdk_8_file_name}"
 

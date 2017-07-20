@@ -25,6 +25,11 @@ echo "Or use download url"
 echo "If want change gradle version just change see https://gradle.org/releases/"
 echo -e "\nHave fine!\n"
 
+which unzip
+checkFuncBack "check if have unzip utils"
+which wget
+checkFuncBack "check if have wget utils"
+
 if [ -d "${gradle_bin_path_shot}" ]; then
     echo "Now"
     pwd
@@ -35,7 +40,7 @@ fi
 if [ ! -f "${gradle_bin_file_name}" ]; then
     echo "can not found file ./${gradle_bin_file_name}"
     echo "try to use ${gradle_download_url}"
-    curl -O "${gradle_download_url}"
+    wget "${gradle_download_url}"
     checkFuncBack "curl -O ${gradle_download_url}"
 fi
 
