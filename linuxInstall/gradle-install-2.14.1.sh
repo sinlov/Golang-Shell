@@ -41,7 +41,7 @@ if [ ! -f "${gradle_bin_file_name}" ]; then
     echo "can not found file ./${gradle_bin_file_name}"
     echo "try to use ${gradle_download_url}"
     wget "${gradle_download_url}"
-    checkFuncBack "curl -O ${gradle_download_url}"
+    checkFuncBack "wget ${gradle_download_url}"
 fi
 
 unzip "./${gradle_bin_file_name}"
