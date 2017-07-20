@@ -1,9 +1,5 @@
+# more info see https://docker.github.io/compose/compose-file/
 version: '3'
-networks:
-  default:
-    # Use a custom driver
-    driver: custom-driver-1
-
 services:
   nginx:
     container_name: "nginx"
@@ -37,3 +33,7 @@ services:
       - "10080:3000"
       - "10022:22"
     restart: always
+networks:
+  default:
+    # Use a custom driver
+    #driver: custom-driver-1
