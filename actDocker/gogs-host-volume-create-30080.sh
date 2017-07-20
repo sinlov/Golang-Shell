@@ -39,4 +39,4 @@ echo -e "If want config
 - do not use inner ssh mode!
 "
 
-echo "run with sudo docker start ${docker_name}"
+echo "run with -> sudo docker start ${docker_name}"
