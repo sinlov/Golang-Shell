@@ -18,7 +18,7 @@ checkFuncBack(){
 echo "this script need use ${jdk_8_file_name} at now folder:"
 pwd
 
-if [ ! -f "./${jdk_8_file_name}" ]; then
+if [ ! -f "${jdk_8_file_name}" ]; then
     echo -e "Error can not find jdk install file ${jdk_8_file_name}"
     echo "you can download by http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html"
     echo "Error exit !"
