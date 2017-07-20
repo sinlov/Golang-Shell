@@ -25,6 +25,13 @@ if [ ! -f "${jdk_8_file_name}" ]; then
     exit 1
 fi
 
+if [ -d "${jdk_8_path_shot}" ]; then
+    echo "Now"
+    pwd
+    echo "${jdk_8_path_shot} has exist exit!"
+    exit 1
+fi
+
 tar zxvf "./${jdk_8_file_name}"
 checkFuncBack "tar unzip ./${jdk_8_file_name}"
 

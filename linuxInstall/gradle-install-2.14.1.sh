@@ -25,6 +25,13 @@ echo "Or use download url"
 echo "If want change gradle version just change see https://gradle.org/releases/"
 echo -e "\nHave fine!\n"
 
+if [ -d "${gradle_bin_path_shot}" ]; then
+    echo "Now"
+    pwd
+    echo "${gradle_bin_path_shot} has exist exit!"
+    exit 1
+fi
+
 if [ ! -f "${gradle_bin_file_name}" ]; then
     echo "can not found file ./${gradle_bin_file_name}"
     echo "try to use ${gradle_download_url}"
