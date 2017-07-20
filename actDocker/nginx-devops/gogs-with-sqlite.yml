@@ -1,0 +1,19 @@
+version: '2'
+services:
+  nginx:
+    container_name: "nginx"
+    image: nginx:alpine
+    volumes:
+      - "~/var/nginx/:/etc/nginx/conf.d/"
+    ports:
+      - "80:80"
+    restart: always
+  gogs:
+    container_name: "gogs"
+    image: gogs/gogs
+    volumes:
+      - "~/var/gogs/:/data"
+    ports:
+      - "10080:3000"
+      - "10022:22"
+    restart: always
