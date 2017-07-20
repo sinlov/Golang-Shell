@@ -31,7 +31,7 @@ checkFuncBack "tar unzip ./${jdk_8_file_name}"
 mv "./${jdk_8_path_shot}" "${jdk_8_install_path_head}"
 checkFuncBack "mv ./${jdk_8_path_shot} ${jdk_8_install_path_head}"
 
-jdkInstallPath="${jdk_8_install_path_head}/${jdk_8_path_shot}"
+jdkInstallPath="${jdk_8_install_path_head}${jdk_8_path_shot}"
 
 if [ -n "${jdkInstallPath}" ]; then
   echo -e "you set install jdk path is ${jdkInstallPath}"

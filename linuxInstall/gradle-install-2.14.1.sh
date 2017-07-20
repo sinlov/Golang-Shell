@@ -38,7 +38,7 @@ checkFuncBack "unzip ./${gradle_bin_file_name}"
 mv "./${gradle_bin_path_shot}" "${gradle_install_path_head}"
 checkFuncBack "mv ./${gradle_bin_path_shot} ${gradle_install_path_head}"
 
-gradleInstallPath="${gradle_install_path_head}/${gradle_bin_path_shot}"
+gradleInstallPath="${gradle_install_path_head}${gradle_bin_path_shot}"
 
 if [ -n "${gradleInstallPath}" ]; then
   echo -e "you set install gradle path is ${gradleInstallPath}"
