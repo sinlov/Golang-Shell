@@ -1,10 +1,10 @@
 {
-  "download_path": "download",
+  "download_path": "build",
   "download_projects": [
     {
-      "name": "OsMobile_Android_Zhengshi_New",
-      "jenkins_url": "http://172.16.1.231:18008/jenkins",
-      "jenkins_group": "Os%20Mobile",
+      "name": "AndroidTest",
+      "jenkins_url": "http://192.168.17.201:18008/jenkins",
+      "jenkins_group": "AndroidTemp",
       "build_history": [
         {
           "build_num": 0,

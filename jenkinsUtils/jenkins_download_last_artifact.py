@@ -1,5 +1,8 @@
 # coding=utf-8
 import json
+import urllib
+import zipfile
+
 import os
 import sys
 import platform
@@ -289,6 +292,35 @@ def exec_cli(cmd_string, cwd=None, time_out=None, is_shell=False):
         return False
 
 
+def check_zip_file_empty(zip_path=str):
+    """
+    :type zip_path: str
+    :param zip_path: zip 文件路径
+    :return: 是否zip为空
+    """
+    if not os.path.exists(zip_path):
+        print 'check zip file is not exists!'
+        return True
+    if os.path.isdir(zip_path):
+        print 'check zip file is dir!'
+        return True
+    print 'watch zip file path: ' + zip_path
+    try:
+        file_count = 0
+        zip_file = zipfile.ZipFile(zip_path, 'r')
+        for path in zip_file.namelist():
+            file_count += 1
+        if file_count == 0:
+            print 'this zip file is zip and is empty'
+            return True
+        else:
+            print 'this zip file is zip and not empty'
+            return False
+    except Exception, e:
+        print 'check_zip_file_empty path: ' + zip_path + ' error' + str(e)
+        return True
+
+
 def read_json_config(config_file):
     # type: (str) -> None
     if not os.path.exists(config_file):
@@ -319,7 +351,17 @@ def download_jenkins_build_artifact(build_type, build_num, jc_work_path, job_url
         build_code = str(build_num)
     download_full_path = '%s/%s/artifact/*zip*/archive.zip' % (job_url_base, build_code)
     new_file_name = '%s-%s.zip' % (build_code, time_stamp_mark())
-    log_printer('-> === just download full url\n%s\nNew name %s\n\n-> ===' % (download_full_path, new_file_name), 'i', True)
+    new_file_path = os.path.join(jc_work_path, new_file_name)
+    log_printer('\n-> === just download\nFull url %s\nNew path: %s\n-> ===\n' % (download_full_path, new_file_path), 'i',
+                True)
+    urllib.urlretrieve(download_full_path, new_file_path)
+    log_printer('-> just download finish\nFrom: %s\nTo: %s\n' % (download_full_path, new_file_path), 'i', True)
+    is_zip_file_empty = check_zip_file_empty(new_file_path)
+    if is_zip_file_empty:
+        log_printer('Download Error Please check, exit 1', 'e', True)
+        exit(1)
+    else:
+        log_printer("Download success!\nSee at: %s" % new_file_path, 'i', True)
 
 
 def filter_project_config(js_project, work_path):
@@ -327,10 +369,10 @@ def filter_project_config(js_project, work_path):
     jc_work_path = os.path.join(work_path, j_name)
     if not check_dir_or_file_is_exist(jc_work_path):
         os.mkdir(jc_work_path)
-        log_printer('just make dir %s for download' % jc_work_path, 'i', True)
+        log_printer('just make dir %s for download\n' % jc_work_path, 'i', True)
     jenkins_url = check_params_none_exit(js_project, 'jenkins_url')
     jenkins_group = check_params_none_exit(js_project, 'jenkins_group')
-    job_url_base = '%s/view/%s/%s' % (jenkins_url, jenkins_group, j_name)
+    job_url_base = '%s/view/%s/job/%s' % (jenkins_url, jenkins_group, j_name)
     auto_clean = check_params_default(js_project, 'auto_clean', 0)
     build_history = get_params_none_to_not_find_value(js_project, 'build_history', '')
     args = get_params_none_to_not_find_value(js_project, 'args', '')
