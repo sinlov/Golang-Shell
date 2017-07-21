@@ -46,7 +46,7 @@ if [ ! -f "${shell_running_path}/${gradle_bin_file_name}" ]; then
     checkFuncBack "wget ${gradle_download_url}"
 fi
 
-unzip "${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}"
+unzip "${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}${gradle_bin_path_shot}"
 checkFuncBack ""${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}""
 
 mv "${shell_running_path}/${gradle_bin_path_shot}" "${gradle_install_path_head}"
