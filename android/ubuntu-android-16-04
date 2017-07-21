@@ -12,7 +12,7 @@ checkFuncBack(){
 root_running_path=$(cd `dirname $0`; pwd)
 
 #run_shell_folder="/SimpleUbuntuInstall/"
-run_shell_folder=""
+run_shell_folder="/"
 
 install_software_name="android sdk and update"
 
@@ -29,7 +29,8 @@ echo -e "
 -> Just start ${start_install_time}
 "
 
-(while :; do echo 'y'; sleep 3; done) | sudo ${root_running_path}${run_shell_folder}android-sdk-download-ubunit-16.sh
+sudo ${root_running_path}${run_shell_folder}android-sdk-download-ubunit-16.sh
+checkFuncBack "${root_running_path}${run_shell_folder}android-sdk-download-ubunit-16.sh"
 sudo ${root_running_path}${run_shell_folder}android-install.sh
 checkFuncBack "sudo ${root_running_path}${run_shell_folder}android-install.sh"
 sudo ${root_running_path}${run_shell_folder}android_sdk_update.sh

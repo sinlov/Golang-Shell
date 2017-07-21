@@ -45,6 +45,12 @@ checkFuncBack "check if have unzip tar tools"
 tar zxvf "${shell_running_path}/${android_sdk_file_name}" -C "${shell_running_path}"
 checkFuncBack "tar zxvf "${shell_running_path}/${android_sdk_file_name}" -C "${shell_running_path}""
 
+if [ ! -d "${android_install_path_head}" ]; then
+    echo -e "can not find ${android_install_path_head} just mark it"
+    mkdir -p ${android_install_path_head}
+    checkFuncBack "mkdir -p ${android_install_path_head}"
+fi
+
 mv "${shell_running_path}/${android_sdk_path_shot}" "${android_install_path_head}"
 checkFuncBack "mv ${shell_running_path}/${android_sdk_path_shot} ${android_install_path_head}"
 
@@ -86,7 +92,10 @@ echo -e "android evn set at ${set_path_file}
 You can change by your self vim ${set_path_file}
 load path by source ${set_path_file}"
 
+
 echo "start clean tmp"
-rm -rf ${shell_running_path}/${android_sdk_path_shot}
-checkFuncBack "rm -rf ${shell_running_path}/${android_sdk_path_shot}"
+if [ -d ${shell_running_path}${android_sdk_path_shot} ]; then
+    rm -rf ${shell_running_path}${android_sdk_path_shot}
+    checkFuncBack "rm -rf ${shell_running_path}${android_sdk_path_shot}"
+fi
 echo "start clean tmp success"

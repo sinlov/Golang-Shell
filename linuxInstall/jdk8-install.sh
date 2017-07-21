@@ -41,8 +41,14 @@ checkFuncBack "check if have unzip tar"
 tar zxvf "${shell_running_path}/${jdk_8_file_name}" -C "${shell_running_path}"
 checkFuncBack "tar zxvf "${shell_running_path}/${jdk_8_file_name}" -C "${shell_running_path}""
 
-mv "${shell_running_path}/${jdk_8_path_shot}" "${jdk_8_install_path_head}/${jdk_8_path_shot}"
-checkFuncBack "mv ${shell_running_path}/${jdk_8_path_shot} ${jdk_8_install_path_head}"
+if [ ! -d "${jdk_8_install_path_head}" ]; then
+    echo -e "can not find ${jdk_8_install_path_head} just mark it"
+    mkdir -p ${jdk_8_install_path_head}
+    checkFuncBack "mkdir -p ${jdk_8_install_path_head}"
+fi
+
+mv "${shell_running_path}/${jdk_8_path_shot}" "${jdk_8_install_path_head}${jdk_8_path_shot}"
+checkFuncBack "mv "${shell_running_path}/${jdk_8_path_shot}" "${jdk_8_install_path_head}${jdk_8_path_shot}""
 
 jdkInstallPath="${jdk_8_install_path_head}${jdk_8_path_shot}"
 
@@ -84,8 +90,8 @@ load path by source ${set_path_file}"
 
 
 echo "start clean tmp"
-if [ -d ${shell_running_path}/${jdk_8_path_shot} ]; then
-    rm -rf ${shell_running_path}/${jdk_8_path_shot}
-    checkFuncBack "rm -rf ${shell_running_path}/${jdk_8_path_shot}"
+if [ -d ${shell_running_path}${jdk_8_path_shot} ]; then
+    rm -rf ${shell_running_path}${jdk_8_path_shot}
+    checkFuncBack "rm -rf ${shell_running_path}${jdk_8_path_shot}"
 fi
 echo "start clean tmp success"

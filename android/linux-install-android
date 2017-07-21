@@ -12,7 +12,7 @@ checkFuncBack(){
 root_running_path=$(cd `dirname $0`; pwd)
 
 #run_shell_folder="/SimpleUbuntuInstall/"
-run_shell_folder=""
+run_shell_folder="/"
 
 install_software_name="android sdk and update"
 

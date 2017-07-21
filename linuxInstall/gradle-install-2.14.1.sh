@@ -42,14 +42,20 @@ fi
 if [ ! -f "${shell_running_path}/${gradle_bin_file_name}" ]; then
     echo "can not found file ${shell_running_path}/${gradle_bin_file_name}"
     echo "try to use ${gradle_download_url}"
-    wget "${gradle_download_url}"
-    checkFuncBack "wget ${gradle_download_url}"
+    wget "${gradle_download_url}" -P ${shell_running_path}
+    checkFuncBack "wget "${gradle_download_url}" -P ${shell_running_path}"
 fi
 
-unzip "${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}${gradle_bin_path_shot}"
+unzip "${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}"
 checkFuncBack ""${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}""
 
-mv "${shell_running_path}/${gradle_bin_path_shot}" "${gradle_install_path_head}/${gradle_bin_path_shot}"
+if [ ! -d "${gradle_install_path_head}" ]; then
+    echo -e "can not find ${gradle_install_path_head} just mark it"
+    mkdir -p ${gradle_install_path_head}
+    checkFuncBack "mkdir -p ${gradle_install_path_head}"
+fi
+
+mv "${shell_running_path}/${gradle_bin_path_shot}" "${gradle_install_path_head}"
 checkFuncBack "mv ${shell_running_path}/${gradle_bin_path_shot} ${gradle_install_path_head}"
 
 gradleInstallPath="${gradle_install_path_head}${gradle_bin_path_shot}"
@@ -91,8 +97,8 @@ load path by source ${set_path_file}"
 
 
 echo "start clean tmp"
-if [ -d ${shell_running_path}/${gradle_bin_path_shot} ]; then
-    rm -rf ${shell_running_path}/${gradle_bin_path_shot}
-    checkFuncBack "rm -rf ${shell_running_path}/${gradle_bin_path_shot}"
+if [ -d ${shell_running_path}${gradle_bin_path_shot} ]; then
+    rm -rf ${shell_running_path}${gradle_bin_path_shot}
+    checkFuncBack "rm -rf ${shell_running_path}${gradle_bin_path_shot}"
 fi
 echo "start clean tmp success"
