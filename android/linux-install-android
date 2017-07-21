@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+checkFuncBack(){
+  if [ $? -eq 0 ]; then
+    echo "$1 pass"
+  else
+    echo "$1 check error exit"
+    exit 1
+  fi
+}
+
+root_running_path=$(cd `dirname $0`; pwd)
+
+#run_shell_folder="/SimpleUbuntuInstall/"
+run_shell_folder=""
+
+install_software_name="android sdk and update"
+
+#echo "need sudo!"
+#sudo pwd
+
+echo "-> no need sudo"
+
+chmod +x ${root_running_path}${run_shell_folder}*.sh
+checkFuncBack "chmod +x ${root_running_path}${run_shell_folder}*.sh"
+
+start_install_time=$(date "+%Y-%m-%d %H:%M:%S")
+echo -e "
+-> Just start ${start_install_time}
+"
+
+#(while :; do echo 'y'; sleep 3; done) | sudo ${root_running_path}${run_shell_folder}run.sh
+sudo ${root_running_path}${run_shell_folder}android-sdk-download-linux.sh
+checkFuncBack "sudo ${root_running_path}${run_shell_folder}android-sdk-download-linux.sh"
+sudo ${root_running_path}${run_shell_folder}android-install.sh
+checkFuncBack "sudo ${root_running_path}${run_shell_folder}android-install.sh"
+sudo ${root_running_path}${run_shell_folder}android_sdk_update.sh
+checkFuncBack "sudo ${root_running_path}${run_shell_folder}android_sdk_update.sh"
+
+end_install_time=$(date "+%Y-%m-%d %H:%M:%S")
+echo -e "====== End [ ${install_software_name} ] at: ${end_install_time} ======"
+time_use=$((`date +%s -d "${end_install_time}"` - `date +%s -d "${start_install_time}"`))
+time_use_format=$(date -d "1970-01-01 CST ${time_use} seconds" "+%T")
+echo -e "
+-> total use time ${time_use_format}
+"
