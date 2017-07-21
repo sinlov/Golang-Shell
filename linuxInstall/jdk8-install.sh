@@ -41,7 +41,7 @@ checkFuncBack "check if have unzip tar"
 tar zxvf "${shell_running_path}/${jdk_8_file_name}" -C "${shell_running_path}"
 checkFuncBack "tar zxvf "${shell_running_path}/${jdk_8_file_name}" -C "${shell_running_path}""
 
-mv "${shell_running_path}/${jdk_8_path_shot}" "${jdk_8_install_path_head}"
+mv "${shell_running_path}/${jdk_8_path_shot}" "${jdk_8_install_path_head}/${jdk_8_path_shot}"
 checkFuncBack "mv ${shell_running_path}/${jdk_8_path_shot} ${jdk_8_install_path_head}"
 
 jdkInstallPath="${jdk_8_install_path_head}${jdk_8_path_shot}"
@@ -82,7 +82,10 @@ echo -e "jdk evn set at ${set_path_file}
 You can change by your self vim ${set_path_file}
 load path by source ${set_path_file}"
 
+
 echo "start clean tmp"
-rm -rf ${shell_running_path}/${jdk_8_path_shot}
-checkFuncBack "rm -rf ${shell_running_path}/${jdk_8_path_shot}"
+if [ -d ${shell_running_path}/${jdk_8_path_shot} ]; then
+    rm -rf ${shell_running_path}/${jdk_8_path_shot}
+    checkFuncBack "rm -rf ${shell_running_path}/${jdk_8_path_shot}"
+fi
 echo "start clean tmp success"

@@ -49,7 +49,7 @@ fi
 unzip "${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}${gradle_bin_path_shot}"
 checkFuncBack ""${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}""
 
-mv "${shell_running_path}/${gradle_bin_path_shot}" "${gradle_install_path_head}"
+mv "${shell_running_path}/${gradle_bin_path_shot}" "${gradle_install_path_head}/${gradle_bin_path_shot}"
 checkFuncBack "mv ${shell_running_path}/${gradle_bin_path_shot} ${gradle_install_path_head}"
 
 gradleInstallPath="${gradle_install_path_head}${gradle_bin_path_shot}"
@@ -89,7 +89,10 @@ echo -e "gradle evn set at ${set_path_file}
 You can change by your self vim ${set_path_file}
 load path by source ${set_path_file}"
 
+
 echo "start clean tmp"
-rm -rf "${shell_running_path}/${gradle_bin_path_shot}"
-checkFuncBack "rm -rf ${shell_running_path}/${gradle_bin_path_shot}"
+if [ -d ${shell_running_path}/${gradle_bin_path_shot} ]; then
+    rm -rf ${shell_running_path}/${gradle_bin_path_shot}
+    checkFuncBack "rm -rf ${shell_running_path}/${gradle_bin_path_shot}"
+fi
 echo "start clean tmp success"
