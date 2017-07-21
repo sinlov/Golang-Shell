@@ -9,6 +9,8 @@ gradle_download_url="https://services.gradle.org/distributions/gradle-${gradle_v
 gradle_install_path_head="$HOME/opt/"
 set_path_file="$HOME/.bash_profile"
 
+shell_running_path=$(cd `dirname $0`; pwd)
+
 checkFuncBack(){
   if [ $? -eq 0 ]; then
     echo "$1 checked"
@@ -19,7 +21,7 @@ checkFuncBack(){
 }
 
 echo "Try to install gradle ${gradle_version}"
-echo "this script can use ${gradle_bin_file_name} at now folder:"
+echo "this script can use ${gradle_bin_file_name} at ${shell_running_path} folder:"
 pwd
 echo "Or use download url"
 echo "If want change gradle version just change see https://gradle.org/releases/"
@@ -30,25 +32,25 @@ checkFuncBack "check if have unzip utils"
 which wget
 checkFuncBack "check if have wget utils"
 
-if [ -d "${gradle_bin_path_shot}" ]; then
+if [ -d "${shell_running_path}/${gradle_bin_path_shot}" ]; then
     echo "Now"
     pwd
-    echo "${gradle_bin_path_shot} has exist exit!"
+    echo "${shell_running_path}/${gradle_bin_path_shot} has exist exit!"
     exit 1
 fi
 
-if [ ! -f "${gradle_bin_file_name}" ]; then
-    echo "can not found file ./${gradle_bin_file_name}"
+if [ ! -f "${shell_running_path}/${gradle_bin_file_name}" ]; then
+    echo "can not found file ${shell_running_path}/${gradle_bin_file_name}"
     echo "try to use ${gradle_download_url}"
     wget "${gradle_download_url}"
     checkFuncBack "wget ${gradle_download_url}"
 fi
 
-unzip "./${gradle_bin_file_name}"
-checkFuncBack "unzip ./${gradle_bin_file_name}"
+unzip "${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}"
+checkFuncBack ""${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}""
 
-mv "./${gradle_bin_path_shot}" "${gradle_install_path_head}"
-checkFuncBack "mv ./${gradle_bin_path_shot} ${gradle_install_path_head}"
+mv "${shell_running_path}/${gradle_bin_path_shot}" "${gradle_install_path_head}"
+checkFuncBack "mv ${shell_running_path}/${gradle_bin_path_shot} ${gradle_install_path_head}"
 
 gradleInstallPath="${gradle_install_path_head}${gradle_bin_path_shot}"
 

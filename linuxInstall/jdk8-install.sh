@@ -6,6 +6,8 @@ jdk_8_path_shot="jdk1.8.0_141"
 jdk_8_install_path_head="$HOME/opt/"
 set_path_file="$HOME/.bash_profile"
 
+shell_running_path=$(cd `dirname $0`; pwd)
+
 checkFuncBack(){
   if [ $? -eq 0 ]; then
     echo "$1 checked"
@@ -18,28 +20,29 @@ checkFuncBack(){
 echo "this script need use ${jdk_8_file_name} at now folder:"
 pwd
 
-if [ ! -f "${jdk_8_file_name}" ]; then
-    echo -e "Error can not find jdk install file ${jdk_8_file_name}"
+if [ ! -f "${shell_running_path}/${jdk_8_file_name}" ]; then
+    echo -e "Error can not find jdk install file ${shell_running_path}/${jdk_8_file_name}"
     echo "you can download by http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html"
     echo "Error exit !"
     exit 1
 fi
 
-if [ -d "${jdk_8_path_shot}" ]; then
+if [ -d "${shell_running_path}/${jdk_8_path_shot}" ]; then
     echo "Now"
     pwd
-    echo "${jdk_8_path_shot} has exist exit!"
+    echo "${shell_running_path}/${jdk_8_path_shot} has exist exit!"
     exit 1
 fi
+
 
 which tar
 checkFuncBack "check if have unzip tar"
 
-tar zxvf "./${jdk_8_file_name}"
-checkFuncBack "tar unzip ./${jdk_8_file_name}"
+tar zxvf "${shell_running_path}/${jdk_8_file_name}" -C "${shell_running_path}"
+checkFuncBack "tar zxvf "${shell_running_path}/${jdk_8_file_name}" -C "${shell_running_path}""
 
-mv "./${jdk_8_path_shot}" "${jdk_8_install_path_head}"
-checkFuncBack "mv ./${jdk_8_path_shot} ${jdk_8_install_path_head}"
+mv "${shell_running_path}/${jdk_8_path_shot}" "${jdk_8_install_path_head}"
+checkFuncBack "mv ${shell_running_path}/${jdk_8_path_shot} ${jdk_8_install_path_head}"
 
 jdkInstallPath="${jdk_8_install_path_head}${jdk_8_path_shot}"
 
