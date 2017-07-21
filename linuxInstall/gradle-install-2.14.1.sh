@@ -88,3 +88,8 @@ EOF
 echo -e "gradle evn set at ${set_path_file}
 You can change by your self vim ${set_path_file}
 load path by source ${set_path_file}"
+
+echo "start clean tmp"
+rm -rf "${shell_running_path}/${gradle_bin_path_shot}"
+checkFuncBack "rm -rf ${shell_running_path}/${gradle_bin_path_shot}"
+echo "start clean tmp success"
