@@ -1,5 +1,5 @@
 # more info see https://docker.github.io/compose/compose-file/
-version: '5'
+version: '3'
 services:
   nexus:
     container_name: "nexus"
