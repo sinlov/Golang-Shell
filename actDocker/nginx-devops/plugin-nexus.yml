@@ -1,0 +1,14 @@
+# more info see https://docker.github.io/compose/compose-file/
+version: '5'
+services:
+  nexus:
+    container_name: "nexus"
+    image: sonatype/nexus
+    volumes:
+      - "~/var/nexus-data/:/sonatype-work/"
+    ports:
+      - "10081:8081"
+networks:
+  default:
+    # Use a custom driver
+    #driver: custom-driver-1

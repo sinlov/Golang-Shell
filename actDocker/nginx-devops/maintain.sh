@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "This script need sudo and docker docker-compose"
+echo "This script need sudo docker docker-compose"
 
 which docker
 docker version
