@@ -1,13 +1,15 @@
 # more info see https://docker.github.io/compose/compose-file/
+# warning when use nexus at local volumes must use `sudo chmod -R o+w ~/var/nexus-data`, then use
 version: '3'
 services:
   nexus:
     container_name: "nexus"
     image: sonatype/nexus
     volumes:
-      - "~/var/nexus-data/:/sonatype-work/"
+      - "~/var/nexus-data:/sonatype-work"
     ports:
       - "10081:8081"
+    restart: always
 networks:
   default:
     # Use a custom driver

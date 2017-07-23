@@ -18,7 +18,7 @@ if [ ! -d "${nexus_data}" ]; then
 	chown -R 200 ${nexus_data}
 fi
 
-echo -e "just try run neuxs as docker"
+echo -e "just try run nexus as docker"
 
 docker run -d=true -it -p 0.0.0.0:${host_port}:8081 --name ${docker_name} -v "${nexus_data}:/sonatype-work" sonatype/nexus
 

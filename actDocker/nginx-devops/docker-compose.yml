@@ -37,9 +37,10 @@ services:
     container_name: "nexus"
     image: sonatype/nexus
     volumes:
-      - "~/var/nexus-data/:/sonatype-work/"
+      - "~/var/nexus-data:/sonatype-work"
     ports:
       - "10081:8081"
+    restart: always
 networks:
   default:
     # Use a custom driver
