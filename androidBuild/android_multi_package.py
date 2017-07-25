@@ -23,7 +23,7 @@ sys.setdefaultencoding('utf-8')
 
 is_verbose = False
 root_run_path = os.getcwd()
-this_tag = 'android_multi_build_'
+this_tag = 'build_'
 
 """
 执行默认超时时间 60 * 1 秒
