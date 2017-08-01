@@ -2,6 +2,7 @@
 import json
 import os
 import sys
+import inspect
 import platform
 import stat
 import time
@@ -41,6 +42,42 @@ out_of_time_build = 60 * 20
 build_gradle_properties = 'gradle.properties'
 
 
+def init_logger(first_tag, sec_tag=str):
+    global logger
+    log_file = first_tag + sec_tag + '.log'
+    log_path = check_current_log_path_and_auto_clean()
+    log_path_join = os.path.join(log_path, log_file)
+    handler = logging.handlers.RotatingFileHandler(log_path_join, maxBytes=1024 * 1024, backupCount=5)
+    fmt = '%(asctime)s - %(filename)s:%(lineno)s - %(name)s - %(levelname)s - %(message)s'
+    formatter = logging.Formatter(fmt)
+    handler.setFormatter(formatter)
+    logger = logging.getLogger(str(getpass.getuser()))
+    logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG)
+    return logger
+
+
+def init_logger_by_time(tag=str):
+    # type: (str) -> Logger
+    return init_logger(tag, find_now_time_format('%Y_%m_%d_%H_%M_%S'))
+
+
+def log_printer(msg, lev=str, must=False):
+    # type: (str, str, bool) -> None
+    if is_verbose or must:
+        print msg,
+    if lev == 'i':
+        logger.info(msg)
+    elif lev == 'd':
+        logger.debug(msg)
+    elif lev == 'w':
+        logger.warning(msg)
+    elif lev == 'e':
+        logger.error(msg)
+    else:
+        logger.info(msg)
+
+
 def find_now_time_format(format_time=str):
     """获取当前时间格式化的函数
     :param format_time:
@@ -73,38 +110,39 @@ def find_now_time_format(format_time=str):
     return time.strftime(format_time, time.localtime(time.time()))
 
 
-def init_logger(first_tag, sec_tag=str):
-    global logger
-    log_file = first_tag + sec_tag + '.log'
-    handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=5)
-    fmt = '%(asctime)s - %(filename)s:%(lineno)s - %(name)s - %(levelname)s - %(message)s'
-    formatter = logging.Formatter(fmt)
-    handler.setFormatter(formatter)
-    logger = logging.getLogger(str(getpass.getuser()))
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
-    return logger
-
-
-def init_logger_by_time(tag=str):
-    # type: (str) -> Logger
-    return init_logger(tag, find_now_time_format('%Y_%m_%d_%H_%M_%S'))
-
-
-def log_printer(msg, lev=str, must=False):
-    # type: (str, str, bool) -> None
-    if is_verbose or must:
-        print msg,
-    if lev == 'i':
-        logger.info(msg)
-    elif lev == 'd':
-        logger.debug(msg)
-    elif lev == 'w':
-        logger.warning(msg)
-    elif lev == 'e':
-        logger.error(msg)
+def check_current_log_path_and_auto_clean():
+    """
+    自动在脚本的运行目录创建 log 子目录，并检查日志文件，自动删除一周前的日志
+    :return:
+    """
+    log_path = os.path.join(current_file_directory(), 'log')
+    if not check_dir_or_file_is_exist(log_path):
+        os.makedirs(log_path)
     else:
-        logger.info(msg)
+        check_time = time.time()
+        for walk_dir, walk_folder, walk_file in os.walk(log_path):
+            for f in walk_file:
+                if f.endswith('.log'):
+                    check_path_join = os.path.join(walk_dir, f)
+                    m_time = os.path.getmtime(check_path_join)
+                    if check_time - m_time > 60480:
+                        os.remove(check_path_join)
+                        print 'auto_clean log file : %s' % check_path_join
+    return log_path
+
+
+def current_file_directory():
+    """
+    获取脚本文件执行目录
+    :return:
+    """
+    path = os.path.realpath(sys.path[0])  # interpreter starter's path
+    if os.path.isfile(path):  # starter is excutable file
+        path = os.path.dirname(path)
+        return os.path.abspath(path)  # return excutable file's directory
+    else:  # starter is python script
+        caller_file = inspect.stack()[1][1]  # function caller's filename
+        return os.path.abspath(os.path.dirname(caller_file))  # return function caller's file's directory
 
 
 def is_platform_windows():
