@@ -27,6 +27,11 @@ root_run_path = os.getcwd()
 this_tag = 'build_'
 
 """
+自动清空日志的时间差，默认为一周
+"""
+out_of_time_log_auto_clean = 60 * 60 * 24 * 7
+
+"""
 执行默认超时时间 60 * 1 秒
 """
 out_of_time_default = 60 * 1
@@ -125,7 +130,7 @@ def check_current_log_path_and_auto_clean():
                 if f.endswith('.log'):
                     check_path_join = os.path.join(walk_dir, f)
                     m_time = os.path.getmtime(check_path_join)
-                    if check_time - m_time > 60480:
+                    if check_time - m_time > out_of_time_log_auto_clean:
                         os.remove(check_path_join)
                         print 'auto_clean log file : %s' % check_path_join
     return log_path
