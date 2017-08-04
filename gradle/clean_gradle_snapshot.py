@@ -194,8 +194,8 @@ def clean_useless_gradle_catch_snapshot():
                 if len(now_folder) > 0:
                     new_sort = sorted_dict_values_to_list(now_folder)
                     for path in new_sort[0: -1]:
-                        log_printer('try to remove useless snapshot at path\n-> %s' % path)
                         shutil.rmtree(path)
+                        log_printer('remove useless snapshot at path\n-> %s' % path, 'i', True)
     else:
         log_printer('can not found gradle catch folder exit', 'e', True)
         exit(1)
