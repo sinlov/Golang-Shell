@@ -483,7 +483,8 @@ def new_git_tag(local_p, tag_git):
             cmd_git_add = 'git tag -a "%s" -m "%s"' % (tag_name, tag_message)
             add_res = exec_cli(cmd_git_add, local_p, out_of_time_default)
             if not add_res:
-                exit(1)
+                log_printer('tag not add but can do to_next_version_tasks', 'i', True)
+
             if 'to_next_version_tasks' in new_tag.keys():
                 to_next_version_tasks = check_json_by_key(new_tag, 'to_next_version_tasks')
                 if len(to_next_version_tasks) > 0:
@@ -501,12 +502,20 @@ def new_git_tag(local_p, tag_git):
                                 'try to do to_next_version_tasks\n-> Name: -> %s\n-> File: %s\n-> from: %s\n-> to: %s' % (
                                     task_name, abs_task_path, file_from, file_to), 'i', True)
                             replace_text(abs_task_path, file_from, file_to)
+
                     git_add_and_commit_by_message(local_p, 'to new version for dev -> %s' % file_to)
+
             if 'push_origin' in new_tag.keys():
                 push_origin = new_tag['push_origin']
                 if push_origin == 1:
-                    cmd_git_tag_push = 'git push origin %s' % tag_name
-                    push_res = exec_cli(cmd_git_tag_push, local_p, out_of_time_default)
+                    if add_res:
+                        cmd_git_tag_push = 'git push origin %s' % tag_name
+                        push_res = exec_cli(cmd_git_tag_push, local_p, out_of_time_default)
+                        if not push_res:
+                            exit(1)
+
+                    cmd_git_push = 'git push'
+                    push_res = exec_cli(cmd_git_push, local_p, out_of_time_default)
                     if not push_res:
                         exit(1)
 
