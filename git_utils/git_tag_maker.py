@@ -505,7 +505,7 @@ def new_git_tag(local_p, tag_git):
             if 'push_origin' in new_tag.keys():
                 push_origin = new_tag['push_origin']
                 if push_origin == 1:
-                    cmd_git_tag_push = 'git pull origin %s' % tag_name
+                    cmd_git_tag_push = 'git push origin %s' % tag_name
                     push_res = exec_cli(cmd_git_tag_push, local_p, out_of_time_default)
                     if not push_res:
                         exit(1)
