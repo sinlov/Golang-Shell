@@ -10,27 +10,42 @@
       "tag": "",
       "version_check": {
         "version_file": "gradle.properties",
-        "version_name": "1.0.1-SNAPSHOT",
-        "version_code": "1000001"
+        "version_code": "1000001",
+        "version_name": "1.0.1-SNAPSHOT"
       },
       "tag_file_tasks": [
-        {
-          "name": "VERSION_NAME",
-          "file": "gradle.properties",
-          "from": "0.0.1",
-          "to": "1.0.0"
-        },
         {
           "name": "VERSION_CODE",
           "file": "gradle.properties",
           "from": "1",
           "to": "1000000"
+        },
+        {
+          "name": "VERSION_NAME",
+          "file": "gradle.properties",
+          "from": "0.0.1",
+          "to": "1.0.0"
         }
       ],
       "tag_git": {
         "new": {
-          "tag_name": "",
-          "tag_message": ""
+          "tag_name": "v1.1.0",
+          "tag_message": "add new code",
+          "to_next_version_tasks": [
+            {
+              "name": "VERSION_CODE",
+              "file": "gradle.properties",
+              "from": "1001000",
+              "to": "1001001"
+            },
+            {
+              "name": "VERSION_NAME",
+              "file": "gradle.properties",
+              "from": "1.1.0",
+              "to": "1.1.1-SNAPSHOT"
+            }
+          ],
+          "push_origin": 0
         },
         "remove_local_tags": [
           {

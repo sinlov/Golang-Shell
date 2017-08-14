@@ -383,9 +383,11 @@ def check_project_version_info_by_file(local, version_file=str, version_name=str
             has_version_code = True
     gp_file.close()
     if has_version_name and has_version_code:
-        log_printer('Check version by gradle.properties success', 'i', True)
+        log_printer('Check version by %s success' % version_file, 'i', True)
     else:
-        log_printer('Check version by gradle.properties fail\nAt path %s!', 'w', True)
+        log_printer(
+            'Check version by %s fail!\n-> path %s\n-> version_name check %s\n-> version_code check: %s\nExit !' %
+            (version_file, gp_path, has_version_name, has_version_code), 'e', True)
         exit(1)
 
 
@@ -395,6 +397,17 @@ def clone_by_tag_or_not_has_tag(branch_p, git_url_p, local_p, project):
         git_clone_project_by_branch_and_try_pull(git_url_p, local_p, branch_p, tag_p)
     else:
         git_clone_project_by_branch_and_try_pull(git_url_p, local_p, branch_p)
+
+
+def git_add_and_commit_by_message(local_p, tag_message):
+    cmd_line = 'git add .'
+    add_res = exec_cli(cmd_line, local_p, out_of_time_default)
+    if not add_res:
+        exit(1)
+    cmd_line_commit = 'git commit -m "%s"' % tag_message
+    add_res = exec_cli(cmd_line_commit, local_p, out_of_time_default)
+    if not add_res:
+        exit(1)
 
 
 def check_version_file_when_has_version_check(local_p, project):
@@ -433,7 +446,7 @@ def remove_tags_local(local_p, tag_git):
         for remove_local_tag in remove_local_tags:
             tag_name = check_json_by_key(remove_local_tag, 'tag_name')
             if tag_name == '':
-                log_printer('new tag name is "" so pass', "w", True)
+                log_printer('remove_tags_local [ tag_name ] is "" so pass\n', "w", True)
             else:
                 cmd_line = 'git tag -d %s' % tag_name
                 remove_tag_res = exec_cli(cmd_line, local_p, out_of_time_default)
@@ -450,7 +463,7 @@ def remove_tags_origin(local_p, tag_git):
         for remove_local_tag in remove_origin_tags:
             tag_name = check_json_by_key(remove_local_tag, 'tag_name')
             if tag_name == '':
-                log_printer('new tag name is "" so pass', "w", True)
+                log_printer('remove_tags_origin [ tag_name ] is "" so pass\n', "w", True)
             else:
                 cmd_line = 'git push origin :refs/tags/%s' % tag_name
                 remove_tag_res = exec_cli(cmd_line, local_p, out_of_time_default)
@@ -466,18 +479,36 @@ def new_git_tag(local_p, tag_git):
             log_printer('new tag name is "" so pass', "w", True)
         else:
             tag_message = check_json_by_key(new_tag, 'tag_message')
-            cmd_line = 'git add .'
-            add_res = exec_cli(cmd_line, local_p, out_of_time_default)
-            if not add_res:
-                exit(1)
-            cmd_line_commit = 'git commit -m "%s"' % tag_message
-            add_res = exec_cli(cmd_line_commit, local_p, out_of_time_default)
-            if not add_res:
-                exit(1)
+            git_add_and_commit_by_message(local_p, tag_message)
             cmd_git_add = 'git tag -a "%s" -m "%s"' % (tag_name, tag_message)
             add_res = exec_cli(cmd_git_add, local_p, out_of_time_default)
             if not add_res:
                 exit(1)
+            if 'to_next_version_tasks' in new_tag.keys():
+                to_next_version_tasks = check_json_by_key(new_tag, 'to_next_version_tasks')
+                if len(to_next_version_tasks) > 0:
+                    file_to = ''
+                    for to_next_version_task in to_next_version_tasks:
+                        task_name = check_json_by_key(to_next_version_task, 'name')
+                        path_file = check_json_by_key(to_next_version_task, 'file')
+                        file_from = check_json_by_key(to_next_version_task, 'from')
+                        file_to = check_json_by_key(to_next_version_task, 'to')
+                        abs_task_path = os.path.join(local_p, path_file)
+                        if not check_dir_or_file_is_exist(abs_task_path):
+                            log_printer('can not find to_next_version_tasks file at [ %s ]' % abs_task_path, 'e', True)
+                        else:
+                            log_printer(
+                                'try to do to_next_version_tasks\n-> Name: -> %s\n-> File: %s\n-> from: %s\n-> to: %s' % (
+                                    task_name, abs_task_path, file_from, file_to), 'i', True)
+                            replace_text(abs_task_path, file_from, file_to)
+                    git_add_and_commit_by_message(local_p, 'to new version for dev -> %s' % file_to)
+            if 'push_origin' in new_tag.keys():
+                push_origin = new_tag['push_origin']
+                if push_origin == 1:
+                    cmd_git_tag_push = 'git pull origin %s' % tag_name
+                    push_res = exec_cli(cmd_git_tag_push, local_p, out_of_time_default)
+                    if not push_res:
+                        exit(1)
 
 
 def filter_project_config(project, build_path=str):
@@ -497,6 +528,7 @@ def filter_project_config(project, build_path=str):
     run_tag_file_tasks_if_has(local_p, project)
     new_git_tag(local_p, tag_git)
     remove_tags_local(local_p, tag_git)
+    remove_tags_origin(local_p, tag_git)
     if auto_clean_p != 0:
         auto_clean_build_project(local_p)
     log_printer('=== end project %s ===' % name_p, 'i', True)
