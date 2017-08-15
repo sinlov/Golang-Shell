@@ -419,105 +419,36 @@ def check_version_file_when_has_version_check(local_p, project):
         check_project_version_info_by_file(local_p, version_file, version_name, version_code)
 
 
-def run_tag_file_tasks_if_has(local_p, project):
-    if 'tag_file_tasks' in project.keys():
-        tag_file_tasks = project['tag_file_tasks']
-        for file_task in tag_file_tasks:
-            task_name = check_json_by_key(file_task, 'name')
-            path_file = check_json_by_key(file_task, 'file')
-            file_from = check_json_by_key(file_task, 'from')
-            file_to = check_json_by_key(file_task, 'to')
-            abs_task_path = os.path.join(local_p, path_file)
-            if not check_dir_or_file_is_exist(abs_task_path):
-                log_printer('can not find tag_file_task file at [ %s ]' % abs_task_path, 'e', True)
+def push_origin_if_has_set(local_p, project):
+    if 'push_origin' in project.keys():
+        push_origin = project['push_origin']
+        if push_origin == 1:
+            cmd_git_push = 'git push'
+            push_res = exec_cli(cmd_git_push, local_p, out_of_time_default)
+            if not push_res:
                 exit(1)
-            else:
-                log_printer('try to do tag_file_task\n-> Name: -> %s\n-> File: %s\n-> from: %s\n-> to: %s' %
-                            (task_name, abs_task_path, file_from, file_to), 'i', True)
-                replace_text(abs_task_path, file_from, file_to)
 
 
-def remove_tags_local(local_p, tag_git):
-    if 'remove_local_tags' in tag_git.keys():
-        remove_local_tags = check_json_by_key(tag_git, 'remove_local_tags')
-        if len(remove_local_tags) < 1:
-            log_printer('remove_local_tags size less than 1 at %s exit!' % tag_git, 'e', True)
-            exit(1)
-        for remove_local_tag in remove_local_tags:
-            tag_name = check_json_by_key(remove_local_tag, 'tag_name')
-            if tag_name == '':
-                log_printer('remove_tags_local [ tag_name ] is "" so pass\n', "w", True)
-            else:
-                cmd_line = 'git tag -d %s' % tag_name
-                remove_tag_res = exec_cli(cmd_line, local_p, out_of_time_default)
-                if not remove_tag_res:
-                    exit(1)
-
-
-def remove_tags_origin(local_p, tag_git):
-    if 'remove_origin_tags' in tag_git.keys():
-        remove_origin_tags = check_json_by_key(tag_git, 'remove_origin_tags')
-        if len(remove_origin_tags) < 1:
-            log_printer('remove_origin_tags size less than 1 at %s exit!' % tag_git, 'e', True)
-            exit(1)
-        for remove_local_tag in remove_origin_tags:
-            tag_name = check_json_by_key(remove_local_tag, 'tag_name')
-            if tag_name == '':
-                log_printer('remove_tags_origin [ tag_name ] is "" so pass\n', "w", True)
-            else:
-                cmd_line = 'git push origin :refs/tags/%s' % tag_name
-                remove_tag_res = exec_cli(cmd_line, local_p, out_of_time_default)
-                if not remove_tag_res:
-                    exit(1)
-
-
-def new_git_tag(local_p, tag_git):
-    if 'new' in tag_git.keys():
-        new_tag = check_json_by_key(tag_git, 'new')
-        tag_name = check_json_by_key(new_tag, 'tag_name')
-        if tag_name == '':
-            log_printer('new tag name is "" so pass', "w", True)
+def run_version_file_tasks_if_has_set(local_p, project):
+    if 'version_file_tasks' in project.keys():
+        version_file_tasks = project['version_file_tasks']
+        if len(version_file_tasks) < 1:
+            log_printer('version_file_tasks size less than 1 pass', 'w', True)
         else:
-            tag_message = check_json_by_key(new_tag, 'tag_message')
-            git_add_and_commit_by_message(local_p, tag_message)
-            cmd_git_add = 'git tag -a "%s" -m "%s"' % (tag_name, tag_message)
-            add_res = exec_cli(cmd_git_add, local_p, out_of_time_default)
-            if not add_res:
-                log_printer('tag not add but can do to_next_version_tasks', 'i', True)
-
-            if 'to_next_version_tasks' in new_tag.keys():
-                to_next_version_tasks = check_json_by_key(new_tag, 'to_next_version_tasks')
-                if len(to_next_version_tasks) > 0:
-                    file_to = ''
-                    for to_next_version_task in to_next_version_tasks:
-                        task_name = check_json_by_key(to_next_version_task, 'name')
-                        path_file = check_json_by_key(to_next_version_task, 'file')
-                        file_from = check_json_by_key(to_next_version_task, 'from')
-                        file_to = check_json_by_key(to_next_version_task, 'to')
-                        abs_task_path = os.path.join(local_p, path_file)
-                        if not check_dir_or_file_is_exist(abs_task_path):
-                            log_printer('can not find to_next_version_tasks file at [ %s ]' % abs_task_path, 'e', True)
-                        else:
-                            log_printer(
-                                'try to do to_next_version_tasks\n-> Name: -> %s\n-> File: %s\n-> from: %s\n-> to: %s' % (
-                                    task_name, abs_task_path, file_from, file_to), 'i', True)
-                            replace_text(abs_task_path, file_from, file_to)
-
-                    git_add_and_commit_by_message(local_p, 'to new version for dev -> %s' % file_to)
-
-            if 'push_origin' in new_tag.keys():
-                push_origin = new_tag['push_origin']
-                if push_origin == 1:
-                    if add_res:
-                        cmd_git_tag_push = 'git push origin %s' % tag_name
-                        push_res = exec_cli(cmd_git_tag_push, local_p, out_of_time_default)
-                        if not push_res:
-                            exit(1)
-
-                    cmd_git_push = 'git push'
-                    push_res = exec_cli(cmd_git_push, local_p, out_of_time_default)
-                    if not push_res:
-                        exit(1)
+            for version_file_task in version_file_tasks:
+                t_name = check_json_by_key(version_file_task, 'name')
+                t_file = check_json_by_key(version_file_task, 'file')
+                t_file = os.path.join(local_p, t_file)
+                t_from = check_json_by_key(version_file_task, 'from')
+                t_to = check_json_by_key(version_file_task, 'to')
+                log_printer('run version file task\n->name %s\n-> file %s\n-> from %s\n-> to %s'
+                            % (t_name, t_file, t_from, t_to), 'i', True)
+                replace_text(t_file, t_from, t_to)
+            version_message = ''
+            if 'version_message' in project.keys():
+                version_message = project['version_message']
+            version_message = '%s to new %s' % (version_message, t_to)
+            git_add_and_commit_by_message(local_p, version_message)
 
 
 def filter_project_config(project, build_path=str):
@@ -527,17 +458,11 @@ def filter_project_config(project, build_path=str):
     local_p = check_json_by_key(project, 'local')
     local_p = os.path.join(build_path, local_p)
     branch_p = check_json_by_key(project, 'branch')
-    tag_git = check_json_by_key(project, 'tag_git')
-    if len(tag_git) < 1:
-        log_printer('tag_git size less than 1 at %s exit!' % project, 'e', True)
-        exit(1)
     auto_clean_p = check_json_by_key(project, 'auto_clean')
     clone_by_tag_or_not_has_tag(branch_p, git_url_p, local_p, project)
     check_version_file_when_has_version_check(local_p, project)
-    run_tag_file_tasks_if_has(local_p, project)
-    new_git_tag(local_p, tag_git)
-    remove_tags_local(local_p, tag_git)
-    remove_tags_origin(local_p, tag_git)
+    run_version_file_tasks_if_has_set(local_p, project)
+    push_origin_if_has_set(local_p, project)
     if auto_clean_p != 0:
         auto_clean_build_project(local_p)
     log_printer('=== end project %s ===' % name_p, 'i', True)
@@ -555,8 +480,8 @@ if __name__ == '__main__':
     parser.add_option('-v', '--verbose', dest='v_verbose', action="store_true",
                       help="see verbose", default=False)
     parser.add_option('--config', dest='config', type="string",
-                      help="build config json file if not set use run path tag.json"
-                      , metavar="tag.json")
+                      help="build config json file if not set use run path version.json"
+                      , metavar="version.json")
     parser.add_option('-c', '--clean', dest='c_clean', action="store_true",
                       help="clean you set build_path at tag.json ", default=False)
     parser.add_option('-f', '--force', dest='f_force', action="store_true",
@@ -565,7 +490,7 @@ if __name__ == '__main__':
     logger = init_logger_by_time(this_tag)
     if options.v_verbose:
         is_verbose = True
-    config_file_path = os.path.join(root_run_path, 'tag.json')
+    config_file_path = os.path.join(root_run_path, 'version.json')
     if options.config:
         config_file_path = options.config
     log_printer('Load config path at: %s\n' % config_file_path, 'i', True)
