@@ -453,7 +453,7 @@ def run_version_file_tasks_if_has_set(local_p, project):
 
 def filter_project_config(project, build_path=str):
     name_p = project['name']
-    log_printer('=== start project %s ===' % name_p, 'i', True)
+    log_printer('\n=== start project %s ===\n' % name_p, 'i', True)
     git_url_p = check_json_by_key(project, 'git_url')
     local_p = check_json_by_key(project, 'local')
     local_p = os.path.join(build_path, local_p)
@@ -465,7 +465,7 @@ def filter_project_config(project, build_path=str):
     push_origin_if_has_set(local_p, project)
     if auto_clean_p != 0:
         auto_clean_build_project(local_p)
-    log_printer('=== end project %s ===' % name_p, 'i', True)
+    log_printer('\n=== end project %s ===\n' % name_p, 'i', True)
 
 
 if __name__ == '__main__':

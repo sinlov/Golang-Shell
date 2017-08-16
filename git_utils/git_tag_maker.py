@@ -522,7 +522,7 @@ def new_git_tag(local_p, tag_git):
 
 def filter_project_config(project, build_path=str):
     name_p = project['name']
-    log_printer('=== start project %s ===' % name_p, 'i', True)
+    log_printer('\n=== start project %s ===\n' % name_p, 'i', True)
     git_url_p = check_json_by_key(project, 'git_url')
     local_p = check_json_by_key(project, 'local')
     local_p = os.path.join(build_path, local_p)
@@ -540,7 +540,7 @@ def filter_project_config(project, build_path=str):
     remove_tags_origin(local_p, tag_git)
     if auto_clean_p != 0:
         auto_clean_build_project(local_p)
-    log_printer('=== end project %s ===' % name_p, 'i', True)
+    log_printer('\n=== end project %s ===\n' % name_p, 'i', True)
 
 
 if __name__ == '__main__':
