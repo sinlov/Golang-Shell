@@ -1,15 +1,14 @@
+#!/usr/bin/env python
+
 # coding=utf-8
 
-import json
 import os
 import sys
 import platform
 import stat
 import time
 import inspect
-import datetime
-import shlex
-import subprocess
+
 import shutil
 
 import logging
@@ -25,13 +24,16 @@ sys.setdefaultencoding('utf-8')
 
 is_verbose = False
 root_run_path = os.getcwd()
+
 this_tag = 'clean_'
+log_time_format = '%Y_%m_%d_%H_%M_%S'
 
 """
-自动清空日志的时间差，默认为一周
+auto clean time default is one week
 """
 out_of_time_log_auto_clean = 60 * 60 * 24 * 7
 
+gradle_snapshot_mark = '-SNAPSHOT'
 gradle_file_2_1_path = os.path.join(os.path.expandvars('$HOME'), '.gradle', 'caches', 'modules-2', 'files-2.1')
 
 
@@ -52,7 +54,7 @@ def init_logger(first_tag, sec_tag=str):
 
 def check_current_log_path_and_auto_clean():
     """
-    自动在脚本的运行目录创建 log 子目录，并检查日志文件，自动删除一周前的日志
+    auto clean log by :out_of_time_log_auto_clean
     :return:
     """
     log_path = os.path.join(current_file_directory(), 'log')
@@ -71,41 +73,17 @@ def check_current_log_path_and_auto_clean():
     return log_path
 
 
-def find_now_time_format(format_time=str):
-    """获取当前时间格式化的函数
-    :param format_time:
-    格式化参数:
-      %y 两位数的年份表示（00-99）
-      %Y 四位数的年份表示（000-9999）
-      %m 月份（01-12）
-      %d 月内中的一天（0-31）
-      %H 24小时制小时数（0-23）
-      %I 12小时制小时数（01-12）
-      %M 分钟数（00=59）
-      %S 秒（00-59）
-      %a 本地简化星期名称
-      %A 本地完整星期名称
-      %b 本地简化的月份名称
-      %B 本地完整的月份名称
-      %c 本地相应的日期表示和时间表示
-      %j 年内的一天（001-366）
-      %p 本地A.M.或P.M.的等价符
-      %U 一年中的星期数（00-53）星期天为星期的开始
-      %w 星期（0-6），星期天为星期的开始
-      %W 一年中的星期数（00-53）星期一为星期的开始
-      %x 本地相应的日期表示
-      %X 本地相应的时间表示
-      %Z 当前时区的名称
-      %% %号本身
-
+def find_now_time_format(format_time):
+    # type: (str) -> format_time
+    """
     :return: time string
     """
     return time.strftime(format_time, time.localtime(time.time()))
 
 
 def init_logger_by_time(tag=str):
-    # type: (str) -> Logger
-    return init_logger(tag, find_now_time_format('%Y_%m_%d_%H_%M_%S'))
+    # type: (str) -> tag
+    return init_logger(tag, find_now_time_format(log_time_format))
 
 
 def log_printer(msg, lev=str, must=False):
@@ -179,7 +157,7 @@ def check_user_gradle_path():
 
 def clean_useless_gradle_catch_snapshot():
     """
-    寻找默认配置的gradle 缓存中，除去最后一次修改的SNAPSHOT
+    find default gradle catch name has gradle_snapshot_mark, remove others except last last modification
     :return:
     """
     if check_user_gradle_path():
@@ -202,16 +180,21 @@ def clean_useless_gradle_catch_snapshot():
 
 
 def find_out_snapshot_path_list():
+    """
+    find out full folder which end with gradle_snapshot_mark which in gradle_file_2_1_path
+    :return: path list
+    """
     snapshot_path_arr = []
     for walk_dir, walk_folder, walk_file in os.walk(gradle_file_2_1_path):
         for d in walk_folder:
-            if d.endswith('-SNAPSHOT'):
+            if d.endswith(gradle_snapshot_mark):
                 snapshot_path = os.path.join(walk_dir, d)
                 snapshot_path_arr.append(snapshot_path)
     return snapshot_path_arr
 
 
 def clean_old_gradle_catch_snapshot():
+    print 'this way is developing! exit 0'
     pass
 
 
