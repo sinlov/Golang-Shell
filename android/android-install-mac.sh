@@ -1,10 +1,10 @@
 #!/bin/bash
 
-android_sdk_file_name="android-sdk_r24.4.1-linux.tgz"
-android_sdk_path_shot="android-sdk-linux"
+android_sdk_file_name="android-sdk_r24.4.1-macosx.zip"
+android_sdk_path_shot="android-sdk-osx"
 
 is_replace_android_tools=0
-android_sdk_tools_file_name="tools_r25.2.3-linux.zip"
+android_sdk_tools_file_name="tools_r25.2.3-macosx.zip"
 android_sdk_tools_path_shot="tools"
 
 android_install_path_head="$HOME/opt/"
@@ -39,11 +39,11 @@ if [ -d "${shell_running_path}/${android_sdk_path_shot}" ]; then
 fi
 
 
-which tar
-checkFuncBack "check if have unzip tar tools"
+which unzip
+checkFuncBack "check if have unzip tools"
 
-tar zxvf "${shell_running_path}/${android_sdk_file_name}" -C "${shell_running_path}"
-checkFuncBack "tar zxvf "${shell_running_path}/${android_sdk_file_name}" -C "${shell_running_path}""
+unzip "${shell_running_path}/${android_sdk_file_name}" -d "${shell_running_path}"
+checkFuncBack "unzip "${shell_running_path}/${android_sdk_file_name}" -d "${shell_running_path}""
 
 if [ ! -d "${android_install_path_head}" ]; then
     echo -e "can not find ${android_install_path_head} just mark it"
@@ -54,24 +54,24 @@ fi
 mv "${shell_running_path}/${android_sdk_path_shot}" "${android_install_path_head}"
 checkFuncBack "mv ${shell_running_path}/${android_sdk_path_shot} ${android_install_path_head}"
 
-jdkInstallPath="${android_install_path_head}${android_sdk_path_shot}"
+androidInstallPath="${android_install_path_head}${android_sdk_path_shot}"
 
-if [ -n "${jdkInstallPath}" ]; then
-  echo -e "you set install path is ${jdkInstallPath}"
+if [ -n "${androidInstallPath}" ]; then
+  echo -e "you set install path is ${androidInstallPath}"
 else
   echo -e "you are not set install path, exit"
   exit 1
 fi
 
 # check install path
-if [ ! -d "${jdkInstallPath}" ]; then
+if [ ! -d "${androidInstallPath}" ]; then
   echo -e "your install path is empty, exit"
   exit 1
 fi
 
 echo -e "This script set event of jdk!
 Env set file path: ${set_path_file}
-JAVA_HOME -> ${jdkInstallPath}
+AndroidHOME -> ${androidInstallPath}
 \n"
 
 if [ ! -f "${set_path_file}" ]; then
