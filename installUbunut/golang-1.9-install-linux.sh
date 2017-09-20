@@ -15,9 +15,10 @@ checkFuncBack(){
 
 golang_download_url="https://www.golangtc.com/static/go/1.9/go1.9.linux-amd64.tar.gz"
 golang_download_file="go1.9.linux-amd64.tar.gz"
-golang_tar_path_shot="go1.9"
+golang_tar_install_version="go1.9"
+golang_tar_path_shot="go"
 golang_install_path_head="$HOME/opt/"
-golang_install_path="${golang_install_path_head}${golang_tar_path_shot}"
+golang_install_path="${golang_install_path_head}${golang_tar_install_version}"
 
 set_go_path_evn="$HOME/goPath"
 set_path_file="$HOME/.bash_profile"
@@ -54,7 +55,7 @@ fi
 if [ -f "${shell_running_path}/${golang_download_file}" ];then
   which tar
   checkFuncBack "check tar"
-  tar jtf ${shell_running_path}/${golang_download_file}
+  tar tf ${shell_running_path}/${golang_download_file}
   if [ $? -gt 0 ]; then
     echo -e "download golang file is broken just delete\n-> path: ${shell_running_path}/${golang_download_file}"
     rm ${shell_running_path}/${golang_download_file}
