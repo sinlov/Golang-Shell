@@ -44,18 +44,20 @@ if [ ! -f "${ANDROID_HOME}/licenses/android-sdk-license" ];then
 EOF
 fi
 
+install_software_name="android update"
+start_install_time=$(date "+%Y-%m-%d %H:%M:%S")
+echo -e "
+-> Just start ${start_install_time}
+"
 
-# update by ${shell_running_path}/android_sdk_components.env
-echo "update by ${shell_running_path}/android_sdk_components.env"
-cp ${shell_running_path}/android_update_sdk.sh ${ANDROID_HOME}/android_update_sdk.sh
-cp ${shell_running_path}/android_sdk_components.env ${ANDROID_HOME}/android_sdk_components.env
+# update by ${ANDROID_HOME}/android_sdk_components.env
+echo "update by ${ANDROID_HOME}/android_sdk_components.env"
 (while :; do echo 'y'; sleep 3; done) | android update sdk --no-ui --all --filter "$(cat ${ANDROID_HOME}/android_sdk_components.env)"
 
-echo -e "update success!
-you can edit
-${ANDROID_HOME}/android_sdk_components.env
-
-then run
-${ANDROID_HOME}/android_update_sdk.sh
-for update
+end_install_time=$(date "+%Y-%m-%d %H:%M:%S")
+echo -e "====== End [ ${install_software_name} ] at: ${end_install_time} ======"
+time_use=$((`date +%s -d "${end_install_time}"` - `date +%s -d "${start_install_time}"`))
+time_use_format=$(date -d "1970-01-01 CST ${time_use} seconds" "+%T")
+echo -e "
+-> total use time ${time_use_format}
 "
