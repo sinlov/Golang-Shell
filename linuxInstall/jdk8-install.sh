@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 jdk_8_file_name="jdk-8u141-linux-x64.tar.gz"
 jdk_8_path_shot="jdk1.8.0_141"
@@ -30,10 +30,28 @@ fi
 if [ -d "${shell_running_path}/${jdk_8_path_shot}" ]; then
     echo "Now"
     pwd
-    echo "${shell_running_path}/${jdk_8_path_shot} has exist exit!"
-    exit 1
+    echo "${shell_running_path}/${jdk_8_path_shot} has exist exit try to delete"
+    #exit 1
+    rm -rf "${shell_running_path}/${jdk_8_path_shot}"
+    checkFuncBack "rm -rf ${shell_running_path}/${jdk_8_path_shot}"
 fi
 
+
+jdkInstallPath="${jdk_8_install_path_head}${jdk_8_path_shot}"
+
+if [ -n "${jdkInstallPath}" ]; then
+  echo -e "you set install jdk path is ${jdkInstallPath}"
+else
+  echo -e "you are not set jdk install path, exit"
+  exit 1
+fi
+
+if [ -d "${jdkInstallPath}" ];then
+    echo "has been install jdk exit"
+    rm -rf "${shell_running_path}/${jdk_8_path_shot}"
+    checkFuncBack "rm -rf ${shell_running_path}/${jdk_8_path_shot}"
+    exit 0
+fi
 
 which tar
 checkFuncBack "check if have unzip tar"
@@ -47,19 +65,10 @@ if [ ! -d "${jdk_8_install_path_head}" ]; then
     checkFuncBack "mkdir -p ${jdk_8_install_path_head}"
 fi
 
-mv "${shell_running_path}/${jdk_8_path_shot}" "${jdk_8_install_path_head}${jdk_8_path_shot}"
-checkFuncBack "mv "${shell_running_path}/${jdk_8_path_shot}" "${jdk_8_install_path_head}${jdk_8_path_shot}""
+mv ${shell_running_path}/${jdk_8_path_shot} ${jdkInstallPath}
+checkFuncBack "mv ${shell_running_path}/${jdk_8_path_shot} ${jdkInstallPath}"
 
-jdkInstallPath="${jdk_8_install_path_head}${jdk_8_path_shot}"
-
-if [ -n "${jdkInstallPath}" ]; then
-  echo -e "you set install jdk path is ${jdkInstallPath}"
-else
-  echo -e "you are not set jdk install path, exit"
-  exit 1
-fi
-
-# check jdk install path
+# check jdk install path again
 if [ ! -d "${jdkInstallPath}" ]; then
   echo -e "you jdk install path is empty, exit"
   exit 1
@@ -94,4 +103,4 @@ if [ -d ${shell_running_path}${jdk_8_path_shot} ]; then
     rm -rf ${shell_running_path}${jdk_8_path_shot}
     checkFuncBack "rm -rf ${shell_running_path}${jdk_8_path_shot}"
 fi
-echo "start clean tmp success"
+echo "clean tmp success"

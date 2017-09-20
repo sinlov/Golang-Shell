@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gradle_version="2.14.1"
+gradle_version="3.3"
 
 gradle_bin_file_name="gradle-${gradle_version}-bin.zip"
 gradle_bin_path_shot="gradle-${gradle_version}"
@@ -35,28 +35,10 @@ checkFuncBack "check if have wget utils"
 if [ -d "${shell_running_path}/${gradle_bin_path_shot}" ]; then
     echo "Now"
     pwd
-    echo "${shell_running_path}/${gradle_bin_path_shot} has exist exit!"
-    exit 1
+    echo "${shell_running_path}/${gradle_bin_path_shot} has exist, try to remove"
+    rm -rf ${shell_running_path}/${gradle_bin_path_shot}
+    checkFuncBack "rm -rf ${shell_running_path}/${gradle_bin_path_shot}"
 fi
-
-if [ ! -f "${shell_running_path}/${gradle_bin_file_name}" ]; then
-    echo "can not found file ${shell_running_path}/${gradle_bin_file_name}"
-    echo "try to use ${gradle_download_url}"
-    wget "${gradle_download_url}" -P ${shell_running_path}
-    checkFuncBack "wget "${gradle_download_url}" -P ${shell_running_path}"
-fi
-
-unzip "${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}"
-checkFuncBack ""${shell_running_path}/${gradle_bin_file_name}" -d "${shell_running_path}""
-
-if [ ! -d "${gradle_install_path_head}" ]; then
-    echo -e "can not find ${gradle_install_path_head} just mark it"
-    mkdir -p ${gradle_install_path_head}
-    checkFuncBack "mkdir -p ${gradle_install_path_head}"
-fi
-
-mv "${shell_running_path}/${gradle_bin_path_shot}" "${gradle_install_path_head}"
-checkFuncBack "mv ${shell_running_path}/${gradle_bin_path_shot} ${gradle_install_path_head}"
 
 gradleInstallPath="${gradle_install_path_head}${gradle_bin_path_shot}"
 
@@ -67,7 +49,41 @@ else
   exit 1
 fi
 
-# check gradle install path
+if [ -d "${gradleInstallPath}" ]; then
+    echo -e "Just isntall gradle install at path: ${gradleInstallPath}, exit"
+  exit 0
+fi
+
+if [ -f "${shell_running_path}/${gradle_bin_file_name}" ]; then
+    unzip -t ${shell_running_path}/${gradle_bin_file_name}
+    if [ ! $? -eq 0 ]; then
+      echo "gradle download zip is broken just remove"
+      rm ${shell_running_path}/${gradle_bin_file_name}
+      checkFuncBack "rm ${shell_running_path}/${gradle_bin_file_name}"
+      echo "bin file is broken so try to use ${gradle_download_url}"
+      wget "${gradle_download_url}" -P ${shell_running_path}
+      checkFuncBack "wget "${gradle_download_url}" -P ${shell_running_path}"
+    fi
+else
+  echo "can not found file ${shell_running_path}/${gradle_bin_file_name}"
+  echo "try to use ${gradle_download_url}"
+  wget "${gradle_download_url}" -P ${shell_running_path}
+  checkFuncBack "wget "${gradle_download_url}" -P ${shell_running_path}"
+fi
+
+unzip ${shell_running_path}/${gradle_bin_file_name} -d ${shell_running_path}
+checkFuncBack "unzip ${shell_running_path}/${gradle_bin_file_name} -d ${shell_running_path}"
+
+if [ ! -d "${gradle_install_path_head}" ]; then
+    echo -e "can not find ${gradle_install_path_head} just mark it"
+    mkdir -p ${gradle_install_path_head}
+    checkFuncBack "mkdir -p ${gradle_install_path_head}"
+fi
+
+mv "${shell_running_path}/${gradle_bin_path_shot}" "${gradle_install_path_head}"
+checkFuncBack "mv ${shell_running_path}/${gradle_bin_path_shot} ${gradle_install_path_head}"
+
+# check gradle install path again
 if [ ! -d "${gradleInstallPath}" ]; then
   echo -e "you gradle install path is empty, exit"
   exit 1
