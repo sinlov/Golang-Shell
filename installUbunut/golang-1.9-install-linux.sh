@@ -41,12 +41,14 @@ fi
 
 
 if [ ! -n "${golang_install_path}" ]; then
-  echo -e "you are not set golang install path, exit"
+  echo -e "you are not set golang install path Exit!"
   exit 1
 fi
 
 if [ -d "${golang_install_path}" ];then
-    echo "has been install golang exit"
+    echo -e "You has been install golang
+-> path: ${golang_install_path}
+Exit 0"
     rm -rf "${shell_running_path}/${golang_tar_path_shot}"
     checkFuncBack "rm -rf ${shell_running_path}/${golang_tar_path_shot}"
     exit 0
