@@ -94,12 +94,12 @@ if [ ! -f "${set_path_file}" ]; then
 EOF
 fi
 
-echo -e "golang evn set at ${set_path_file}
-You can change by your self(empty is not change):"
-read customSetPathFile
-if [ ! -n "$customSetPathFile" ]; then
-  set_path_file="${customSetPathFile}"
-fi
+#echo -e "golang evn set at ${set_path_file}
+#You can change by your self(empty is not change):"
+#read customSetPathFile
+#if [ ! -n "$customSetPathFile" ]; then
+#  set_path_file="${customSetPathFile}"
+#fi
 
 echo "now path file at ${set_path_file}"
 
