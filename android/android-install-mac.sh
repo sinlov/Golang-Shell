@@ -7,6 +7,7 @@ android_sdk_path_shot="android-sdk-osx"
 android_sdk_tools_path_shot="tools"
 
 android_install_path_head="$HOME/opt/"
+androidInstallPath="${android_install_path_head}${android_sdk_path_shot}"
 set_path_file="$HOME/.bash_profile"
 
 shell_running_path=$(cd `dirname $0`; pwd)
@@ -21,7 +22,13 @@ checkFuncBack(){
 }
 
 echo "this script need use ${android_sdk_file_name} at now folder:"
-pwd
+
+if [ -n "${androidInstallPath}" ]; then
+  echo -e "you set install path is ${androidInstallPath}"
+else
+  echo -e "you are not set install path, exit"
+  exit 1
+fi
 
 if [ ! -f "${shell_running_path}/${android_sdk_file_name}" ]; then
     echo -e "Error can not find install file ${shell_running_path}/${android_sdk_file_name}"
@@ -31,9 +38,21 @@ if [ ! -f "${shell_running_path}/${android_sdk_file_name}" ]; then
 fi
 
 if [ -d "${shell_running_path}/${android_sdk_path_shot}" ]; then
-    echo "${shell_running_path}/${android_sdk_path_shot} has exist exit"
+    echo -e "catch android sdk path at
+path: ${shell_running_path}/${android_sdk_path_shot}
+try to remove
+"
+    rm -rf ${shell_running_path}/${android_sdk_path_shot}
+    checkFuncBack "rm -rf ${shell_running_path}/${android_sdk_path_shot}"
+fi
+
+if [ -d "${androidInstallPath}" ]; then
+  echo -e "want install android sdk at
+path: ${androidInstallPath}
+exist exit install 0"
     exit 0
 fi
+
 
 
 which unzip
@@ -52,16 +71,8 @@ fi
 mv "${shell_running_path}/${android_sdk_path_shot}" "${android_install_path_head}"
 checkFuncBack "mv ${shell_running_path}/${android_sdk_path_shot} ${android_install_path_head}"
 
-androidInstallPath="${android_install_path_head}${android_sdk_path_shot}"
 
-if [ -n "${androidInstallPath}" ]; then
-  echo -e "you set install path is ${androidInstallPath}"
-else
-  echo -e "you are not set install path, exit"
-  exit 1
-fi
-
-# check install path
+# check install path again
 if [ ! -d "${androidInstallPath}" ]; then
   echo -e "your install path is empty, exit"
   exit 1
