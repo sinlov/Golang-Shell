@@ -29,10 +29,11 @@ echo -e "
 -> Just start ${start_install_time}
 "
 
-sudo ${root_running_path}${run_shell_folder}android-sdk-download-ubunit-16.sh
-checkFuncBack "${root_running_path}${run_shell_folder}android-sdk-download-ubunit-16.sh"
-sudo ${root_running_path}${run_shell_folder}android-install.sh
-checkFuncBack "sudo ${root_running_path}${run_shell_folder}android-install.sh"
+
+sudo ${root_running_path}${run_shell_folder}android-sdk-download-ubuntu-16.sh
+checkFuncBack "${root_running_path}${run_shell_folder}android-sdk-download-ubuntu-16.sh"
+sudo ${root_running_path}${run_shell_folder}android-install-linux.sh
+checkFuncBack "sudo ${root_running_path}${run_shell_folder}android-install-linux.sh"
 sudo ${root_running_path}${run_shell_folder}android_sdk_update.sh
 checkFuncBack "sudo ${root_running_path}${run_shell_folder}android_sdk_update.sh"
 

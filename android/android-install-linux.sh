@@ -1,10 +1,9 @@
 #!/bin/bash
 
 android_sdk_file_name="android-sdk_r24.4.1-linux.tgz"
-android_sdk_path_shot="android-sdk-linux"
-
-is_replace_android_tools=0
 android_sdk_tools_file_name="tools_r25.2.3-linux.zip"
+
+android_sdk_path_shot="android-sdk-linux"
 android_sdk_tools_path_shot="tools"
 
 android_install_path_head="$HOME/opt/"
@@ -32,15 +31,16 @@ if [ ! -f "${shell_running_path}/${android_sdk_file_name}" ]; then
 fi
 
 if [ -d "${shell_running_path}/${android_sdk_path_shot}" ]; then
-    echo "Now"
-    pwd
-    echo "${shell_running_path}/${android_sdk_path_shot} has exist exit!"
-    exit 1
+    echo "${shell_running_path}/${android_sdk_path_shot} has exist exit"
+    exit 0
 fi
 
 
 which tar
 checkFuncBack "check if have unzip tar tools"
+
+tar tf ${shell_running_path}/${android_sdk_file_name}
+checkFuncBack "tar tf ${shell_running_path}/${android_sdk_file_name}"
 
 tar zxvf "${shell_running_path}/${android_sdk_file_name}" -C "${shell_running_path}"
 checkFuncBack "tar zxvf "${shell_running_path}/${android_sdk_file_name}" -C "${shell_running_path}""
@@ -98,4 +98,4 @@ if [ -d ${shell_running_path}${android_sdk_path_shot} ]; then
     rm -rf ${shell_running_path}${android_sdk_path_shot}
     checkFuncBack "rm -rf ${shell_running_path}${android_sdk_path_shot}"
 fi
-echo "start clean tmp success"
+echo "clean tmp success"

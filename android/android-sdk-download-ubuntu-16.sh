@@ -16,6 +16,10 @@ android_sdk_file_name="android-sdk_r24.4.1-linux.tgz"
 android_sdk_tools_download_url="https://dl.google.com/android/repository/tools_r25.2.3-linux.zip"
 android_sdk_tools_file_name="tools_r25.2.3-linux.zip"
 
+
+# sudo apt-get install libc6-dev-i386 lib32z1 default-jdk
+(while sleep 3; do echo "y"; done) | sudo apt-get install libc6-dev-i386 lib32z1
+
 if [ -f "${shell_running_path}/${android_sdk_file_name}" ]; then
     tar tf ${shell_running_path}/${android_sdk_file_name}
     if [ $? -gt 0 ]; then

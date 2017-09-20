@@ -32,8 +32,8 @@ echo -e "
 #(while :; do echo 'y'; sleep 3; done) | sudo ${root_running_path}${run_shell_folder}run.sh
 sudo ${root_running_path}${run_shell_folder}android-sdk-download-linux.sh
 checkFuncBack "sudo ${root_running_path}${run_shell_folder}android-sdk-download-linux.sh"
-sudo ${root_running_path}${run_shell_folder}android-install.sh
-checkFuncBack "sudo ${root_running_path}${run_shell_folder}android-install.sh"
+sudo ${root_running_path}${run_shell_folder}android-install-linux.sh
+checkFuncBack "sudo ${root_running_path}${run_shell_folder}android-install-linux.sh"
 sudo ${root_running_path}${run_shell_folder}android_sdk_update.sh
 checkFuncBack "sudo ${root_running_path}${run_shell_folder}android_sdk_update.sh"
 

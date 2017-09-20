@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # this script install golang at
 
@@ -118,7 +118,7 @@ export GOPATH=${set_go_path_evn}
 export PATH=\$PATH:${set_go_path_evn}/bin
 GO_BIN_HOME=${set_go_path_evn}/bin
 export GO_BIN_HOME
-export PATH=\$PATH:\$GO_BIN_HOM
+export PATH=\$PATH:\$GO_BIN_HOME
 EOF
 echo -e "golang evn set at ${set_path_file}
 You can change by your self or load path by

@@ -1,10 +1,9 @@
 #!/bin/bash
 
 android_sdk_file_name="android-sdk_r24.4.1-macosx.zip"
-android_sdk_path_shot="android-sdk-osx"
-
-is_replace_android_tools=0
 android_sdk_tools_file_name="tools_r25.2.3-macosx.zip"
+
+android_sdk_path_shot="android-sdk-osx"
 android_sdk_tools_path_shot="tools"
 
 android_install_path_head="$HOME/opt/"
@@ -32,16 +31,15 @@ if [ ! -f "${shell_running_path}/${android_sdk_file_name}" ]; then
 fi
 
 if [ -d "${shell_running_path}/${android_sdk_path_shot}" ]; then
-    echo "Now"
-    pwd
-    echo "${shell_running_path}/${android_sdk_path_shot} has exist exit!"
-    exit 1
+    echo "${shell_running_path}/${android_sdk_path_shot} has exist exit"
+    exit 0
 fi
 
 
 which unzip
 checkFuncBack "check if have unzip tools"
-
+unzip -t ${shell_running_path}/${android_sdk_file_name}
+checkFuncBack "unzip -t ${shell_running_path}/${android_sdk_file_name}"
 unzip "${shell_running_path}/${android_sdk_file_name}" -d "${shell_running_path}"
 checkFuncBack "unzip "${shell_running_path}/${android_sdk_file_name}" -d "${shell_running_path}""
 
@@ -98,4 +96,4 @@ if [ -d ${shell_running_path}${android_sdk_path_shot} ]; then
     rm -rf ${shell_running_path}${android_sdk_path_shot}
     checkFuncBack "rm -rf ${shell_running_path}${android_sdk_path_shot}"
 fi
-echo "start clean tmp success"
+echo "clean tmp success"

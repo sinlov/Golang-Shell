@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 checkFuncBack(){
   if [ $? -eq 0 ]; then
@@ -10,6 +10,10 @@ checkFuncBack(){
 }
 
 echo "This script need set ANDROID_HOME and event be right!"
+
+if [ -f "$HOME/.bash_profile" ]; then
+	source $HOME/.bash_profile
+fi
 
 check_android=$(echo $ANDROID_HOME)
 if [ ! -n "${check_android}" ]; then
