@@ -28,8 +28,6 @@ if [ ! -f "${shell_running_path}/${jdk_8_file_name}" ]; then
 fi
 
 if [ -d "${shell_running_path}/${jdk_8_path_shot}" ]; then
-    echo "Now"
-    pwd
     echo "${shell_running_path}/${jdk_8_path_shot} has exist exit try to delete"
     #exit 1
     rm -rf "${shell_running_path}/${jdk_8_path_shot}"
