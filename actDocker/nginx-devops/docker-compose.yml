@@ -41,6 +41,14 @@ services:
     ports:
       - "10081:8081"
     restart: always
+  nexus3:
+    container_name: "nexus3"
+    image: sonatype/nexus3
+    volumes:
+      - "~/var/nexus3/:/some/dir/nexus-data"
+    ports:
+      - "8081:8081"
+    restart: always
 networks:
   default:
     # Use a custom driver
