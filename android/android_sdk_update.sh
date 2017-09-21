@@ -48,14 +48,28 @@ fi
 # update by ${shell_running_path}/android_sdk_components.env
 echo "update by ${shell_running_path}/android_sdk_components.env"
 cp ${shell_running_path}/android_update_sdk.sh ${ANDROID_HOME}/android_update_sdk.sh
+cp ${shell_running_path}/android_update_support.sh ${ANDROID_HOME}/android_update_support.sh
 cp ${shell_running_path}/android_sdk_components.env ${ANDROID_HOME}/android_sdk_components.env
 (while :; do echo 'y'; sleep 3; done) | android update sdk --no-ui --all --filter "$(cat ${ANDROID_HOME}/android_sdk_components.env)"
 
 echo -e "update success!
+== After install you must use ==
+
+sudo chown -R User:User $ANDROID_HOME/
+
+fix $ANDROID_HOME build Permission issues
+
+== force update full SDK ==
 you can edit
 ${ANDROID_HOME}/android_sdk_components.env
-
 then run
 ${ANDROID_HOME}/android_update_sdk.sh
 for update
+
+== fix support error ==
+you can edit
+${ANDROID_HOME}/android_update_support.env
+then run
+${ANDROID_HOME}/android_update_support.sh
+this script can fix com.android.support.constraint:constraint-layout error
 "
