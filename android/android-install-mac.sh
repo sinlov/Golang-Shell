@@ -3,7 +3,7 @@
 android_sdk_file_name="android-sdk_r24.4.1-macosx.zip"
 android_sdk_tools_file_name="tools_r25.2.3-macosx.zip"
 
-android_sdk_path_shot="android-sdk-osx"
+android_sdk_path_shot="android-sdk-macosx"
 android_sdk_tools_path_shot="tools"
 
 android_install_path_head="$HOME/opt/"
