@@ -17,9 +17,6 @@ android_sdk_file_name="android-sdk_r24.4.1-macosx.zip"
 android_sdk_tools_download_url="https://dl.google.com/android/repository/tools_r25.2.3-macosx.zip"
 android_sdk_tools_file_name="tools_r25.2.3-macosx.zip"
 
-which curl
-checkFuncBack "check if have curl utils"
-
 
 if [ -f "${shell_running_path}/${android_sdk_file_name}" ]; then
     unzip -t ${shell_running_path}/${android_sdk_file_name}
@@ -37,10 +34,10 @@ which wget
 checkFuncBack "check if have wget utils"
 
 if [ ! -f "${shell_running_path}/${android_sdk_file_name}" ]; then
-	curl -O ${shell_running_path} ${android_sdk_download_url}
-	checkFuncBack "curl -O ${shell_running_path} ${android_sdk_download_url}"
-	unzip -t ${shell_running_path}/${android_sdk_file_name}
-	checkFuncBack "unzip -t ${shell_running_path}/${android_sdk_file_name}"
+	wget ${android_sdk_download_url} -P ${shell_running_path}
+	checkFuncBack "wget ${android_sdk_download_url} -P ${shell_running_path}"
+	tar tf ${shell_running_path}/${android_sdk_file_name}
+	checkFuncBack "tar tf ${shell_running_path}/${android_sdk_file_name}"
 fi
 
 
@@ -58,8 +55,8 @@ fi
 
 
 if [ ! -f "${shell_running_path}/${android_sdk_tools_file_name}" ]; then
-	curl -O ${shell_running_path} ${android_sdk_tools_download_url}
-	checkFuncBack "curl -O ${shell_running_path} ${android_sdk_tools_download_url}"
+	wget ${android_sdk_tools_download_url} -P ${shell_running_path}
+	checkFuncBack "wget ${android_sdk_tools_download_url} -P ${shell_running_path}"
 	unzip -t ${shell_running_path}/${android_sdk_tools_file_name}
 	checkFuncBack "unzip -t ${shell_running_path}/${android_sdk_tools_file_name}"
 fi
