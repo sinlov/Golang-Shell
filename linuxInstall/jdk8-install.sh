@@ -88,7 +88,7 @@ cat >> "${set_path_file}" << EOF
 
 # set jdk environment
 export JAVA_HOME=${jdkInstallPath}
-export PATH=\$JAVA_HOME/bin:\$PATH
+export PATH=\$PATH:\$JAVA_HOME/bin
 export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar
 EOF
 echo -e "jdk evn set at ${set_path_file}
