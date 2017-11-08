@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import json
 import os
 import sys
@@ -25,6 +25,7 @@ sys.setdefaultencoding('utf-8')
 is_verbose = False
 root_run_path = os.getcwd()
 this_tag = 'build_'
+log_folder = 'log'
 
 """
 自动清空日志的时间差，默认为一周
@@ -43,6 +44,41 @@ out_of_time_clone = 60 * 30
 执行单位推送超时时间 60 * 20 秒
 """
 out_of_time_push = 60 * 20
+
+
+class Logger_Print:
+    ERROR = '\033[91m'
+    OK_GREEN = '\033[96m'
+    WARNING = '\033[93m'
+    OK_BLUE = '\033[94m'
+    HEADER = '\033[95m'
+    WRITE = '\033[98m'
+    BLACK = '\033[97m'
+    END_LI = '\033[0m'
+
+    @staticmethod
+    def log_normal(info):
+        print Logger_Print.WRITE + info + Logger_Print.END_LI
+
+    @staticmethod
+    def log_assert(info):
+        print Logger_Print.BLACK + info + Logger_Print.END_LI
+
+    @staticmethod
+    def log_info(info):
+        print Logger_Print.OK_GREEN + info + Logger_Print.END_LI
+
+    @staticmethod
+    def log_debug(info):
+        print Logger_Print.OK_BLUE + info + Logger_Print.END_LI
+
+    @staticmethod
+    def log_warning(info):
+        print Logger_Print.WARNING + info + Logger_Print.END_LI
+
+    @staticmethod
+    def log_error(info):
+        print Logger_Print.ERROR + info + Logger_Print.END_LI
 
 
 def init_logger(first_tag, sec_tag=str):
@@ -68,7 +104,21 @@ def init_logger_by_time(tag=str):
 def log_printer(msg, lev=str, must=False):
     # type: (str, str, bool) -> None
     if is_verbose or must:
-        print msg,
+        if not is_platform_windows():
+            if lev == 'i':
+                Logger_Print.log_info('%s' % msg)
+            elif lev == 'd':
+                Logger_Print.log_debug('%s' % msg)
+            elif lev == 'w':
+                Logger_Print.log_warning('%s' % msg)
+            elif lev == 'e':
+                Logger_Print.log_error('%s' % msg)
+            elif lev == 'a':
+                Logger_Print.log_assert('%s' % msg)
+            else:
+                print '%s\n' % msg
+        else:
+            print '%s\n' % msg
     if lev == 'i':
         logger.info(msg)
     elif lev == 'd':
@@ -77,6 +127,8 @@ def log_printer(msg, lev=str, must=False):
         logger.warning(msg)
     elif lev == 'e':
         logger.error(msg)
+    elif lev == 'a':
+        logger.debug(msg)
     else:
         logger.info(msg)
 
@@ -118,7 +170,7 @@ def check_current_log_path_and_auto_clean():
     自动在脚本的运行目录创建 log 子目录，并检查日志文件，自动删除一周前的日志
     :return:
     """
-    log_path = os.path.join(current_file_directory(), 'log')
+    log_path = os.path.join(current_file_directory(), log_folder)
     if not check_dir_or_file_is_exist(log_path):
         os.makedirs(log_path)
     else:
@@ -543,6 +595,34 @@ def filter_project_config(project, build_path=str):
     log_printer('\n=== end project %s ===\n' % name_p, 'i', True)
 
 
+def parser_tag_config_json(parser_json_path=str):
+    # type: (str) -> None
+    global is_verbose
+    parser_json_path = os.path.join(root_run_path, parser_json_path)
+    if not os.path.exists(parser_json_path):
+        log_printer("can not find json config, exit!", 'e', True)
+        exit(1)
+    else:
+        log_printer('Load parser path at: %s\n' % parser_json_path, 'i', True)
+        try:
+            with open(parser_json_path, 'r') as load_js:
+                parser_js = json.load(load_js)
+                js_out_path = str(check_json_by_key(parser_js, 'out_path'))
+                if js_out_path.startswith('.'):
+                    js_out_path = os.path.join(root_run_path, js_out_path)
+                if os.path.exists(js_out_path):
+                    log_printer('out parser path at: [ %s ] exists, exit by Error\n' % js_out_path, 'e', True)
+                    exit(1)
+                else:
+                    out_p_f = open(js_out_path, 'w')
+                    out_p_f.write('{}')
+                    out_p_f.close()
+        except Exception, e:
+            log_printer('Read json config file: %s\n%s\nError, exit!' % (parser_json_path, str(e)), 'e', True)
+            exit(1)
+    pass
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print "You must input params or see -h"
@@ -554,13 +634,16 @@ if __name__ == '__main__':
     parser = optparse.OptionParser('Usage %prog ' + '-i -v')
     parser.add_option('-v', '--verbose', dest='v_verbose', action="store_true",
                       help="see verbose", default=False)
-    parser.add_option('--config', dest='config', type="string",
-                      help="build config json file if not set use run path tag.json"
-                      , metavar="tag.json")
     parser.add_option('-c', '--clean', dest='c_clean', action="store_true",
                       help="clean you set build_path at tag.json ", default=False)
     parser.add_option('-f', '--force', dest='f_force', action="store_true",
                       help="force run not set check", default=False)
+    parser.add_option('--config', dest='config', type="string",
+                      help="build config json file if not set use run path tag.json"
+                      , metavar="tag.json")
+    parser.add_option('--parser', dest='parser', type="string",
+                      help="parser config.json file by config"
+                      , metavar="tag_parser.json")
     (options, args) = parser.parse_args()
     logger = init_logger_by_time(this_tag)
     if options.v_verbose:
@@ -578,6 +661,9 @@ if __name__ == '__main__':
         shutil.rmtree(build_path, True)
         time.sleep(1)
         log_printer('Clean success : %s' % build_path, 'i', True)
+        exit(0)
+    if options.parser:
+        parser_tag_config_json(options.parser)
         exit(0)
     if options.f_force:
         read_json_config(config_file_path)
