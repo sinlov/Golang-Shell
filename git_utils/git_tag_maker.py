@@ -45,6 +45,8 @@ out_of_time_clone = 60 * 30
 """
 out_of_time_push = 60 * 20
 
+is_force = False
+
 
 class Logger_Print:
     ERROR = '\033[91m'
@@ -337,6 +339,7 @@ def read_json_file(js_path=str):
 def read_json_config(json_path=str):
     # type: (str) -> None
     global is_verbose
+    log_printer('Load config path at: %s\n' % config_file_path, 'i', True)
     if not os.path.exists(json_path):
         log_printer("can not find json config, exit!", 'e', True)
         exit(1)
@@ -607,15 +610,33 @@ def parser_tag_config_json(parser_json_path=str):
         try:
             with open(parser_json_path, 'r') as load_js:
                 parser_js = json.load(load_js)
-                js_out_path = str(check_json_by_key(parser_js, 'out_path'))
-                if js_out_path.startswith('.'):
-                    js_out_path = os.path.join(root_run_path, js_out_path)
-                if os.path.exists(js_out_path):
-                    log_printer('out parser path at: [ %s ] exists, exit by Error\n' % js_out_path, 'e', True)
+                parser_out_path = str(check_json_by_key(parser_js, 'parser_out_path'))
+                if parser_out_path.startswith('./'):
+                    true_path = parser_out_path[2:]
+                    parser_out_path = os.path.join(root_run_path, true_path)
+                if os.path.exists(parser_out_path):
+                    log_printer('out parser path at: [ %s ] exists, exit by Error\n' % parser_out_path, 'e', True)
                     exit(1)
                 else:
-                    out_p_f = open(js_out_path, 'w')
-                    out_p_f.write('{}')
+                    parser_build_path = str(check_json_by_key(parser_js, 'parser_build_path'))
+                    parser_mode = str(check_json_by_key(parser_js, 'parser_mode'))
+                    same_parser_params = check_json_by_key(parser_js, 'same_parser_params')
+                    parser_projects = check_json_by_key(parser_js, 'parser_projects')
+                    if len(parser_projects) < 1:
+                        log_printer('parser_projects size less than 1 at %s exit!' % parser_projects, 'e', True)
+                        exit(1)
+                    build_project_list = []
+                    for parser_project in parser_projects:
+                        parser_project = dict(same_parser_params, **parser_project)
+                        build_project_list.append(parser_project)
+                    out_js = {
+                        'build_path': parser_build_path,
+                        'mode': parser_mode,
+                        'build_projects': build_project_list
+                    }
+                    json_str = json.dumps(out_js)
+                    out_p_f = open(parser_out_path, 'w')
+                    out_p_f.write(json_str)
                     out_p_f.close()
         except Exception, e:
             log_printer('Read json config file: %s\n%s\nError, exit!' % (parser_json_path, str(e)), 'e', True)
@@ -649,9 +670,11 @@ if __name__ == '__main__':
     if options.v_verbose:
         is_verbose = True
     config_file_path = os.path.join(root_run_path, 'tag.json')
+    if options.f_force:
+        is_force = True
     if options.config:
-        config_file_path = options.config
-    log_printer('Load config path at: %s\n' % config_file_path, 'i', True)
+        read_json_config(options.config)
+        exit(0)
     if options.c_clean:
         js = read_json_file(config_file_path)
         build_path = js['build_path']
@@ -665,5 +688,3 @@ if __name__ == '__main__':
     if options.parser:
         parser_tag_config_json(options.parser)
         exit(0)
-    if options.f_force:
-        read_json_config(config_file_path)
