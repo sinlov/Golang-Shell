@@ -33,7 +33,7 @@ cat >> "${set_path_file}" << EOF
 
 # set maven environment
 export MAVEN_HOME=${mavenInstallPath}
-export PATH=\$MAVEN_HOME/bin:\$PATH
+export PATH=\$PATH:\$MAVEN_HOME/bin
 EOF
 echo -e "maven evn set at ${set_path_file}
 You can change by your self vim ${set_path_file}

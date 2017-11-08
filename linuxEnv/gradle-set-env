@@ -33,7 +33,7 @@ cat >> "${set_path_file}" << EOF
 
 # set gradle environment
 export gradle_HOME=${gradleInstallPath}
-export PATH=\$gradle_HOME/bin:\$PATH
+export PATH=\$PATH:\$gradle_HOME/bin
 EOF
 echo -e "gradle evn set at ${set_path_file}
 You can change by your self vim ${set_path_file}

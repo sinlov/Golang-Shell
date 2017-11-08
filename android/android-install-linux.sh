@@ -94,7 +94,7 @@ cat >> "${set_path_file}" << EOF
 # set android environment
 ANDROID_HOME=${androidInstallPath}
 export ANDROID_HOME
-export PATH=\${ANDROID_HOME}/tools:\${ANDROID_HOME}/platform-tools:\${ANDROID_HOME}/build-tools/24.0.0:\$PATH
+export PATH=\$PATH:\${ANDROID_HOME}/tools:\${ANDROID_HOME}/platform-tools:\${ANDROID_HOME}/build-tools/24.0.0
 EOF
 echo -e "android evn set at ${set_path_file}
 You can change by your self vim ${set_path_file}

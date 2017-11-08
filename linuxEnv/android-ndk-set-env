@@ -34,7 +34,7 @@ cat >> "${set_path_file}" << EOF
 # set androidNDK environment
 ANDROID_NDK_HOME=${androidNDKInstallPath}
 export ANDROID_NDK_HOME
-export PATH=\${ANDROID_NDK_HOME}:\$PATH
+export PATH=\$PATH:\${ANDROID_NDK_HOME}
 EOF
 echo -e "androidNDK evn set at ${set_path_file}
 You can change by your self vim ${set_path_file}
