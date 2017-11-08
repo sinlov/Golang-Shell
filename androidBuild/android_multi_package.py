@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import json
 import os
 import sys
@@ -25,6 +25,7 @@ sys.setdefaultencoding('utf-8')
 is_verbose = False
 root_run_path = os.getcwd()
 this_tag = 'build_'
+log_folder = 'log'
 
 """
 自动清空日志的时间差，默认为一周
@@ -45,6 +46,41 @@ out_of_time_clone = 60 * 30
 out_of_time_build = 60 * 20
 
 build_gradle_properties = 'gradle.properties'
+
+
+class Logger_Print:
+    ERROR = '\033[91m'
+    OK_GREEN = '\033[96m'
+    WARNING = '\033[93m'
+    OK_BLUE = '\033[94m'
+    HEADER = '\033[95m'
+    WRITE = '\033[98m'
+    BLACK = '\033[97m'
+    END_LI = '\033[0m'
+
+    @staticmethod
+    def log_normal(info):
+        print Logger_Print.WRITE + info + Logger_Print.END_LI
+
+    @staticmethod
+    def log_assert(info):
+        print Logger_Print.BLACK + info + Logger_Print.END_LI
+
+    @staticmethod
+    def log_info(info):
+        print Logger_Print.OK_GREEN + info + Logger_Print.END_LI
+
+    @staticmethod
+    def log_debug(info):
+        print Logger_Print.OK_BLUE + info + Logger_Print.END_LI
+
+    @staticmethod
+    def log_warning(info):
+        print Logger_Print.WARNING + info + Logger_Print.END_LI
+
+    @staticmethod
+    def log_error(info):
+        print Logger_Print.ERROR + info + Logger_Print.END_LI
 
 
 def init_logger(first_tag, sec_tag=str):
@@ -70,7 +106,21 @@ def init_logger_by_time(tag=str):
 def log_printer(msg, lev=str, must=False):
     # type: (str, str, bool) -> None
     if is_verbose or must:
-        print msg,
+        if not is_platform_windows():
+            if lev == 'i':
+                Logger_Print.log_info('%s' % msg)
+            elif lev == 'd':
+                Logger_Print.log_debug('%s' % msg)
+            elif lev == 'w':
+                Logger_Print.log_warning('%s' % msg)
+            elif lev == 'e':
+                Logger_Print.log_error('%s' % msg)
+            elif lev == 'a':
+                Logger_Print.log_assert('%s' % msg)
+            else:
+                print '%s\n' % msg
+        else:
+            print '%s\n' % msg
     if lev == 'i':
         logger.info(msg)
     elif lev == 'd':
@@ -79,6 +129,8 @@ def log_printer(msg, lev=str, must=False):
         logger.warning(msg)
     elif lev == 'e':
         logger.error(msg)
+    elif lev == 'a':
+        logger.debug(msg)
     else:
         logger.info(msg)
 
@@ -120,7 +172,7 @@ def check_current_log_path_and_auto_clean():
     自动在脚本的运行目录创建 log 子目录，并检查日志文件，自动删除一周前的日志
     :return:
     """
-    log_path = os.path.join(current_file_directory(), 'log')
+    log_path = os.path.join(current_file_directory(), log_folder)
     if not check_dir_or_file_is_exist(log_path):
         os.makedirs(log_path)
     else:
@@ -415,7 +467,11 @@ def build_android_project_at_module_by_task(local, tasks):
         else:
             task_unit = ':%s:%s' % (module_task, task_task)
         if 'need_refresh_depend' in task.keys():
-            res_task = run_single_gradle_task(local, gradlew_tag, task_unit, is_verbose, True)
+            need_refresh_depend_val = task['need_refresh_depend']
+            if need_refresh_depend_val == 1:
+                res_task = run_single_gradle_task(local, gradlew_tag, task_unit, is_verbose, True)
+            else:
+                res_task = run_single_gradle_task(local, gradlew_tag, task_unit, is_verbose, False)
         else:
             res_task = run_single_gradle_task(local, gradlew_tag, task_unit, is_verbose)
         if not res_task:
