@@ -515,6 +515,12 @@ def filter_project_config(project, build_path=str):
         auto_clean_build_project(local_p)
 
 
+def parser_config_file(out, parser_config):
+    config_js = read_json_file(parser_config)
+
+    pass
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print "You must input params or see -h"
@@ -529,12 +535,19 @@ if __name__ == '__main__':
     parser.add_option('--config', dest='config', type="string",
                       help="build config json file if not set use run path build.json"
                       , metavar="build.json")
+    parser.add_option('--parser', dest='parser', type="string",
+                      help="parser config.json file by config"
+                      , metavar="parser.json")
+    parser.add_option('-o', '--out', dest='out', type="string",
+                      help="out file"
+                      , metavar="out.json")
     parser.add_option('-c', '--clean', dest='c_clean', action="store_true",
                       help="clean you set build_path ", default=False)
     parser.add_option('-f', '--force', dest='f_force', action="store_true",
                       help="force build not set check", default=False)
     (options, args) = parser.parse_args()
     logger = init_logger_by_time(this_tag)
+    out_path = ''
     if options.v_verbose:
         is_verbose = True
     config_file_path = os.path.join(root_run_path, "build.json")
@@ -551,5 +564,17 @@ if __name__ == '__main__':
         time.sleep(1)
         log_printer('Clean success : %s' % build_path, 'i', True)
         exit(0)
+    if options.out:
+        out_path = options.out
+    if options.parser:
+        if out_path == '':
+            log_printer('out path is empty, please check -o params, exit 1', 'e', True)
+            exit(1)
+        else:
+            if check_dir_or_file_is_exist(out_path):
+                log_printer('out path is exist\n-> path: %s, please check -o params, exit 1' % out_path, 'e', True)
+                exit(1)
+        parser_path = options.parser
+        parser_config_file(out_path, parser_path)
     if options.f_force:
         read_json_config(config_file_path)
