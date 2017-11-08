@@ -27,6 +27,8 @@ root_run_path = os.getcwd()
 this_tag = 'build_'
 log_folder = 'log'
 
+is_force = False
+
 """
 自动清空日志的时间差，默认为一周
 """
@@ -338,6 +340,7 @@ def read_json_file(js_path=str):
 
 def read_json_config(json_path=str):
     # type: (str) -> None
+    log_printer('Load config path at: %s\n' % config_file_path, 'i', True)
     if not os.path.exists(json_path):
         log_printer("can not find json config, exit!", 'e', True)
         exit(1)
@@ -500,8 +503,16 @@ def replace_gradle_properties(local, replace_properties):
                     replace_text(gradle_p_path, rgp['from'], rgp['to'])
 
 
+def check_json_by_key(json_dir, j_key):
+    if j_key in json_dir:
+        return json_dir[j_key]
+    else:
+        log_printer('not find json key [ %s ] at [ %s ] exit!' % (j_key, json_dir), 'e', True)
+        exit(1)
+
+
 def filter_project_config(project, build_path=str):
-    name_p = project['name']
+    # name_p = project['name']
     if 'git_url' in project:
         git_url_p = project['git_url']
     else:
@@ -571,9 +582,48 @@ def filter_project_config(project, build_path=str):
         auto_clean_build_project(local_p)
 
 
-def parser_config_file(out, parser_config):
-    config_js = read_json_file(parser_config)
-
+def parser_config_file(parser_json_path=str):
+    # type: (str) -> None
+    parser_json_path = os.path.join(root_run_path, parser_json_path)
+    if not os.path.exists(parser_json_path):
+        log_printer("can not find json parser, exit!", 'e', True)
+        exit(1)
+    else:
+        log_printer('Load parser path at: %s\n' % parser_json_path, 'i', True)
+        try:
+            with open(parser_json_path, 'r') as load_js:
+                parser_js = json.load(load_js)
+                parser_out_path = str(check_json_by_key(parser_js, 'parser_out_path'))
+                if parser_out_path.startswith('./'):
+                    true_path = parser_out_path[2:]
+                    parser_out_path = os.path.join(root_run_path, true_path)
+                if os.path.exists(parser_out_path):
+                    log_printer('out parser path at: [ %s ] exists, exit by Error\n' % parser_out_path, 'e', True)
+                    exit(1)
+                else:
+                    parser_build_path = str(check_json_by_key(parser_js, 'parser_build_path'))
+                    parser_mode = str(check_json_by_key(parser_js, 'parser_mode'))
+                    same_parser_params = check_json_by_key(parser_js, 'same_parser_params')
+                    parser_projects = check_json_by_key(parser_js, 'parser_projects')
+                    if len(parser_projects) < 1:
+                        log_printer('parser_projects size less than 1 at %s exit!' % parser_projects, 'e', True)
+                        exit(1)
+                    build_project_list = []
+                    for parser_project in parser_projects:
+                        parser_project = dict(same_parser_params, **parser_project)
+                        build_project_list.append(parser_project)
+                    out_js = {
+                        'build_path': parser_build_path,
+                        'mode': parser_mode,
+                        'build_projects': build_project_list
+                    }
+                    json_str = json.dumps(out_js)
+                    out_p_f = open(parser_out_path, 'w')
+                    out_p_f.write(json_str)
+                    out_p_f.close()
+        except Exception, e:
+            log_printer('Read json config file: %s\n%s\nError, exit!' % (parser_json_path, str(e)), 'e', True)
+            exit(1)
     pass
 
 
@@ -594,22 +644,17 @@ if __name__ == '__main__':
     parser.add_option('--parser', dest='parser', type="string",
                       help="parser config.json file by config"
                       , metavar="parser.json")
-    parser.add_option('-o', '--out', dest='out', type="string",
-                      help="out file"
-                      , metavar="out.json")
     parser.add_option('-c', '--clean', dest='c_clean', action="store_true",
                       help="clean you set build_path ", default=False)
     parser.add_option('-f', '--force', dest='f_force', action="store_true",
                       help="force build not set check", default=False)
     (options, args) = parser.parse_args()
     logger = init_logger_by_time(this_tag)
-    out_path = ''
     if options.v_verbose:
         is_verbose = True
+    if options.f_force:
+        is_force = True
     config_file_path = os.path.join(root_run_path, "build.json")
-    if options.config:
-        config_file_path = options.config
-    log_printer('Load config path at: %s\n' % config_file_path, 'i', True)
     if options.c_clean:
         js = read_json_file(config_file_path)
         build_path = js['build_path']
@@ -620,17 +665,10 @@ if __name__ == '__main__':
         time.sleep(1)
         log_printer('Clean success : %s' % build_path, 'i', True)
         exit(0)
-    if options.out:
-        out_path = options.out
-    if options.parser:
-        if out_path == '':
-            log_printer('out path is empty, please check -o params, exit 1', 'e', True)
-            exit(1)
-        else:
-            if check_dir_or_file_is_exist(out_path):
-                log_printer('out path is exist\n-> path: %s, please check -o params, exit 1' % out_path, 'e', True)
-                exit(1)
-        parser_path = options.parser
-        parser_config_file(out_path, parser_path)
-    if options.f_force:
+    if options.config:
+        config_file_path = options.config
         read_json_config(config_file_path)
+        exit(0)
+    if options.parser:
+        parser_config_file(options.parser)
+        exit(0)

@@ -603,7 +603,7 @@ def parser_tag_config_json(parser_json_path=str):
     global is_verbose
     parser_json_path = os.path.join(root_run_path, parser_json_path)
     if not os.path.exists(parser_json_path):
-        log_printer("can not find json config, exit!", 'e', True)
+        log_printer("can not find json parser, exit!", 'e', True)
         exit(1)
     else:
         log_printer('Load parser path at: %s\n' % parser_json_path, 'i', True)
