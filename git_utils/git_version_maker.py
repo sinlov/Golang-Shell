@@ -504,5 +504,5 @@ if __name__ == '__main__':
         time.sleep(1)
         log_printer('Clean success : %s' % build_path, 'i', True)
         exit(0)
-    if options.f_force:
+    elif options.f_force:
         read_json_config(config_file_path)

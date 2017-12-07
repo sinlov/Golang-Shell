@@ -46,6 +46,7 @@ out_of_time_clone = 60 * 30
 out_of_time_push = 60 * 20
 
 is_force = False
+mode_test = False
 
 
 class Logger_Print:
@@ -336,6 +337,13 @@ def read_json_file(js_path=str):
         exit(1)
 
 
+def exit_by_not_mode_test(error_message=str):
+    # type: (str) -> None
+    log_printer(error_message, 'e', True)
+    if not mode_test:
+        exit(1)
+
+
 def read_json_config(json_path=str):
     # type: (str) -> None
     global is_verbose
@@ -367,8 +375,7 @@ def check_json_by_key(json_dir, j_key):
     if j_key in json_dir:
         return json_dir[j_key]
     else:
-        log_printer('not find json key [ %s ] at [ %s ] exit!' % (j_key, json_dir), 'e', True)
-        exit(1)
+        exit_by_not_mode_test('not find json key [ %s ] at [ %s ] exit!' % (j_key, json_dir))
 
 
 def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, branch='', tag=''):
@@ -384,21 +391,21 @@ def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, br
             cmd_line = 'git clone %s -b %s %s' % (project_url, branch, '\"%s\"' % local_path)
             clone_res = exec_cli(cmd_line, root_run_path, out_of_time_clone)
             if not clone_res:
-                exit(1)
+                exit_by_not_mode_test(cmd_line)
             git_tag_checkout = 'git checkout %s' % tag
             clone_res = exec_cli(git_tag_checkout, local_path, out_of_time_clone)
             if not clone_res:
-                exit(1)
+                exit_by_not_mode_test(git_tag_checkout)
     else:
         cmd_line = 'git clone %s -b %s %s' % (project_url, branch, '\"%s\"' % local_path)
         clone_res = exec_cli(cmd_line, root_run_path, out_of_time_clone)
         if not clone_res:
-            exit(1)
+            exit_by_not_mode_test(cmd_line)
         if tag.strip():
             git_tag_checkout = 'git checkout %s' % tag
             clone_res = exec_cli(git_tag_checkout, local_path, out_of_time_clone)
             if not clone_res:
-                exit(1)
+                exit_by_not_mode_test(git_tag_checkout)
     git_branch_check = 'git branch -v'
     exec_cli(git_branch_check, local_path)
     git_fetch = 'git fetch -v'
@@ -406,7 +413,7 @@ def git_clone_project_by_branch_and_try_pull(project_url=str, local_path=str, br
     gs_cmd = 'git status'
     gs = exec_cli(gs_cmd, local_path)
     if not gs:
-        exit(1)
+        exit_by_not_mode_test(gs_cmd)
 
 
 def auto_clean_build_project(local=str):
@@ -423,8 +430,7 @@ def auto_clean_build_project(local=str):
 def check_project_version_info_by_file(local, version_file=str, version_name=str, version_code=str):
     gp_path = os.path.join(local, version_file)
     if not check_dir_or_file_is_exist(gp_path):
-        log_printer('version_file not found  at path: %s\exit 1' % gp_path, 'e', True)
-        exit(1)
+        exit_by_not_mode_test('version_file not found  at path: %s\exit 1' % gp_path)
     has_version_name = False
     has_version_code = False
     gp_file = open(gp_path, 'r')
@@ -439,11 +445,14 @@ def check_project_version_info_by_file(local, version_file=str, version_name=str
     gp_file.close()
     if has_version_name and has_version_code:
         log_printer('Check version by %s success' % version_file, 'i', True)
+        return True
     else:
-        log_printer(
-            'Check version by %s fail!\n-> path %s\n-> version_name check %s\n-> version_code check: %s\nExit !' %
-            (version_file, gp_path, has_version_name, has_version_code), 'e', True)
-        exit(1)
+        exit_by_not_mode_test(
+            'Check version by %s fail!\n-> path %s\n'
+            '-> version_name check: %s <- want: %s\n'
+            '-> version_code check: %s <- want: %s\nExit at ordinary mode' %
+            (version_file, gp_path, has_version_name, version_name, has_version_code, version_code))
+        return False
 
 
 def clone_by_tag_or_not_has_tag(branch_p, git_url_p, local_p, project):
@@ -471,7 +480,10 @@ def check_version_file_when_has_version_check(local_p, project):
         version_file = check_json_by_key(version_check_p, 'version_file')
         version_name = check_json_by_key(version_check_p, 'version_name')
         version_code = check_json_by_key(version_check_p, 'version_code')
-        check_project_version_info_by_file(local_p, version_file, version_name, version_code)
+        by_file = check_project_version_info_by_file(local_p, version_file, version_name, version_code)
+        return by_file
+    else:
+        return True
 
 
 def run_tag_file_tasks_if_has(local_p, project):
@@ -484,8 +496,7 @@ def run_tag_file_tasks_if_has(local_p, project):
             file_to = check_json_by_key(file_task, 'to')
             abs_task_path = os.path.join(local_p, path_file)
             if not check_dir_or_file_is_exist(abs_task_path):
-                log_printer('can not find tag_file_task file at [ %s ]' % abs_task_path, 'e', True)
-                exit(1)
+                exit_by_not_mode_test('can not find tag_file_task file at [ %s ]' % abs_task_path)
             else:
                 log_printer('try to do tag_file_task\n-> Name: -> %s\n-> File: %s\n-> from: %s\n-> to: %s' %
                             (task_name, abs_task_path, file_from, file_to), 'i', True)
@@ -560,19 +571,20 @@ def new_git_tag(local_p, tag_git):
 
                     git_add_and_commit_by_message(local_p, 'to new version for dev -> %s' % file_to)
 
-            if 'push_origin' in new_tag.keys():
-                push_origin = new_tag['push_origin']
-                if push_origin == 1:
-                    if add_res:
-                        cmd_git_tag_push = 'git push origin %s' % tag_name
-                        push_res = exec_cli(cmd_git_tag_push, local_p, out_of_time_default)
+            if not mode_test:
+                if 'push_origin' in new_tag.keys():
+                    push_origin = new_tag['push_origin']
+                    if push_origin == 1:
+                        if add_res:
+                            cmd_git_tag_push = 'git push origin %s' % tag_name
+                            push_res = exec_cli(cmd_git_tag_push, local_p, out_of_time_default)
+                            if not push_res:
+                                exit(1)
+
+                        cmd_git_push = 'git push'
+                        push_res = exec_cli(cmd_git_push, local_p, out_of_time_default)
                         if not push_res:
                             exit(1)
-
-                    cmd_git_push = 'git push'
-                    push_res = exec_cli(cmd_git_push, local_p, out_of_time_default)
-                    if not push_res:
-                        exit(1)
 
 
 def filter_project_config(project, build_path=str):
@@ -588,11 +600,12 @@ def filter_project_config(project, build_path=str):
         exit(1)
     auto_clean_p = check_json_by_key(project, 'auto_clean')
     clone_by_tag_or_not_has_tag(branch_p, git_url_p, local_p, project)
-    check_version_file_when_has_version_check(local_p, project)
-    run_tag_file_tasks_if_has(local_p, project)
-    new_git_tag(local_p, tag_git)
-    remove_tags_local(local_p, tag_git)
-    remove_tags_origin(local_p, tag_git)
+    version_check = check_version_file_when_has_version_check(local_p, project)
+    if version_check:
+        run_tag_file_tasks_if_has(local_p, project)
+        new_git_tag(local_p, tag_git)
+        remove_tags_local(local_p, tag_git)
+        remove_tags_origin(local_p, tag_git)
     if auto_clean_p != 0:
         auto_clean_build_project(local_p)
     log_printer('\n=== end project %s ===\n' % name_p, 'i', True)
@@ -644,6 +657,25 @@ def parser_tag_config_json(parser_json_path=str):
     pass
 
 
+def parser_clean_and_try_clean(c_clean=str):
+    global config_file_path
+    check_clean_path = os.path.join(root_run_path, c_clean)
+    if os.path.exists(check_clean_path):
+        config_file_path = check_clean_path
+    if os.path.exists(config_file_path):
+        js = read_json_file(config_file_path)
+        build_path = js['build_path']
+        build_path = os.path.join(root_run_path, build_path)
+        change_files_write(build_path)
+        time.sleep(1)
+        shutil.rmtree(build_path, True)
+        time.sleep(1)
+        log_printer('Clean success : %s' % build_path, 'i', True)
+    else:
+        log_printer('can not find path %s\nExit 1!' % config_file_path, 'e', True)
+        exit(1)
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print "You must input params or see -h"
@@ -655,14 +687,17 @@ if __name__ == '__main__':
     parser = optparse.OptionParser('Usage %prog ' + '-i -v')
     parser.add_option('-v', '--verbose', dest='v_verbose', action="store_true",
                       help="see verbose", default=False)
-    parser.add_option('-c', '--clean', dest='c_clean', action="store_true",
-                      help="clean you set build_path at tag.json ", default=False)
     parser.add_option('-f', '--force', dest='f_force', action="store_true",
                       help="force run not set check", default=False)
-    parser.add_option('--config', dest='config', type="string",
+    parser.add_option('--test', dest='c_test', action="store_true",
+                      help="set mode of test", default=False)
+    parser.add_option('--clean', dest='c_clean', type="string",
+                      help="clean you set if not set use run path tag.json"
+                      , metavar="tag.json")
+    parser.add_option('--config', dest='c_config', type="string",
                       help="build config json file if not set use run path tag.json"
                       , metavar="tag.json")
-    parser.add_option('--parser', dest='parser', type="string",
+    parser.add_option('--parser', dest='c_parser', type="string",
                       help="parser config.json file by config"
                       , metavar="tag_parser.json")
     (options, args) = parser.parse_args()
@@ -672,19 +707,14 @@ if __name__ == '__main__':
     config_file_path = os.path.join(root_run_path, 'tag.json')
     if options.f_force:
         is_force = True
-    if options.config:
-        read_json_config(options.config)
-        exit(0)
+    if options.c_test:
+        mode_test = True
     if options.c_clean:
-        js = read_json_file(config_file_path)
-        build_path = js['build_path']
-        build_path = os.path.join(root_run_path, build_path)
-        change_files_write(build_path)
-        time.sleep(1)
-        shutil.rmtree(build_path, True)
-        time.sleep(1)
-        log_printer('Clean success : %s' % build_path, 'i', True)
+        parser_clean_and_try_clean(options.c_clean)
         exit(0)
-    if options.parser:
-        parser_tag_config_json(options.parser)
+    elif options.c_config:
+        read_json_config(options.c_config)
+        exit(0)
+    elif options.c_parser:
+        parser_tag_config_json(options.c_parser)
         exit(0)
