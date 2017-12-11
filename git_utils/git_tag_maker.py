@@ -537,7 +537,53 @@ def remove_tags_origin(local_p, tag_git):
                     exit(1)
 
 
-def new_git_tag(local_p, tag_git):
+def merge_origin_branch(local_p, new_tag_js, branch_p):
+    """
+    合并远程分支，从 tag_git -> new -> merge_origin_branch 读取
+    合并完成将回到 branch_p 入参的分支
+    在 tag_git -> new -> push_origin 值为 1
+    :param local_p: git 运行目录
+    :param new_tag_js: tag_git -> new 转换的字典
+    :param branch_p: 回切分支
+    :return: 如果有操作，出错返回 False，其他情况为 True
+    """
+    if 'merge_origin_branch' in new_tag_js:
+        branch_for_merge = new_tag_js['merge_origin_branch']
+        cmd_git_checkout = 'git checkout %s' % branch_for_merge
+        checkout_res = exec_cli(cmd_git_checkout, local_p, out_of_time_default)
+        if not checkout_res:
+            log_printer('merge origin checkout fail -> %s' % cmd_git_checkout, 'e', True)
+            return False
+        cmd_git_merge = 'git merge origin/%s' % branch_for_merge
+        git_merge_res = exec_cli(cmd_git_merge, local_p, out_of_time_default)
+        if not git_merge_res:
+            log_printer('merge origin merge fail -> %s' % cmd_git_checkout, 'e', True)
+            return False
+        if 'push_origin' in new_tag_js.keys():
+            push_origin = new_tag_js['push_origin']
+            if 1 == push_origin:
+                cmd_git_merge_push = 'git push -v origin/%s' % branch_for_merge
+                git_merge_push_res = exec_cli(cmd_git_merge_push, local_p, out_of_time_default)
+                if not git_merge_push_res:
+                    log_printer('merge origin merge push fail -> %s' % cmd_git_checkout, 'e', True)
+        cmd_git_checkout_from = 'git checkout %s' % branch_p
+        git_checkout_from_res = exec_cli(cmd_git_checkout_from, local_p, out_of_time_default)
+        if not git_checkout_from_res:
+            log_printer('merge origin merge check out from fail -> %s' % cmd_git_checkout, 'e', True)
+        return True
+    else:
+        log_printer('merge origin branch not set', 'i', False)
+    return True
+
+
+def new_git_tag(local_p, tag_git, branch_p):
+    """
+    这个函数，除了可以增加一个tag外，还会尝试合并远程分支
+    :param local_p: 运行目录
+    :param tag_git: tag json 字典
+    :param branch_p: 父节点分支设置
+    :return:
+    """
     if 'new' in tag_git.keys():
         new_tag = check_json_by_key(tag_git, 'new')
         tag_name = check_json_by_key(new_tag, 'tag_name')
@@ -549,8 +595,10 @@ def new_git_tag(local_p, tag_git):
             cmd_git_add = 'git tag -a "%s" -m "%s"' % (tag_name, tag_message)
             add_res = exec_cli(cmd_git_add, local_p, out_of_time_default)
             if not add_res:
-                log_printer('tag not add but can do to_next_version_tasks', 'i', True)
-
+                log_printer('tag not add but can do to_next_version_tasks', 'w', True)
+            if not merge_origin_branch(local_p, new_tag, branch_p):
+                log_printer('merge origin branch fail', 'e', True)
+                return
             if 'to_next_version_tasks' in new_tag.keys():
                 to_next_version_tasks = check_json_by_key(new_tag, 'to_next_version_tasks')
                 if len(to_next_version_tasks) > 0:
@@ -603,7 +651,7 @@ def filter_project_config(project, build_path=str):
     version_check = check_version_file_when_has_version_check(local_p, project)
     if version_check:
         run_tag_file_tasks_if_has(local_p, project)
-        new_git_tag(local_p, tag_git)
+        new_git_tag(local_p, tag_git, branch_p)
         remove_tags_local(local_p, tag_git)
         remove_tags_origin(local_p, tag_git)
     if auto_clean_p != 0:
@@ -612,6 +660,12 @@ def filter_project_config(project, build_path=str):
 
 
 def parser_tag_config_json(parser_json_path=str):
+    """
+    解析时，使用 "same_parser_params" 同样节点的参数
+    如果 "parser_projects" 数组节点中，有个性参数，将覆盖共性参数
+    :param parser_json_path:
+    :return:
+    """
     # type: (str) -> None
     global is_verbose
     parser_json_path = os.path.join(root_run_path, parser_json_path)
