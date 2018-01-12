@@ -12,7 +12,7 @@ shell_run_path=$(cd `dirname $0`; pwd)
 # local_ip=`host $local_host 2>/dev/null | awk '{print $NF}'`
 
 docker_name="swagger-ui"
-host_domain="192.168.15.175"
+host_domain="127.0.0.1"
 host_port="38080"
 access_protocol="http://"
 access_route="/"
@@ -49,27 +49,32 @@ volume path: ${swagger-ui_data}
 api_url=${api_url}
 "
 
+checkEnv docker
+
 #if [ ! -d "${swagger_ui_data}" ]; then
-	#echo -e "volume path : ${swagger-ui_data}\nIs not exist just mkdir"
-	#mkdir -p ${swagger_ui_data}
-	#chown -R 200 ${swagger_ui_data}
-	#chmod -R 466 ${swagger_ui_data}
+  #echo -e "volume path : ${swagger-ui_data}\nIs not exist just mkdir"
+  #mkdir -p ${swagger_ui_data}
+  #chown -R 200 ${swagger_ui_data}
+  #chmod -R 466 ${swagger_ui_data}
 #fi
 
-old_container=$(docker inspect --format='{{ .State.Status}}' ${docker_name})
+old_container=$(docker ps --filter 'name=${docker_name}' | wc -l)
+echo -e "old_container ${old_container}"
 
-if [ -n "${olo_container}" ];then
-    echo -e "find out same not container just rm it"
+if [[ "${olo_container}" > "1" ]]; then
+    echo -e "find out same name [ ${docker_name} ] container just rm it"
+    echo -e "docker stop ${docker_name}"
     docker stop ${docker_name}
     checkFuncBack "docker stop ${docker_name}"
+    echo -e "docker rm ${docker_name}"
     docker rm ${docker_name}
     checkFuncBack "docker rm ${docker_name}"
 fi
 
-echo -e "just try run swagger-ui as docker"
+echo -e "Just try run swagger-ui as docker"
 
-echo -e "docker run -it --name ${docker_name} -e API_URL=${api_url} -p ${host_port}:8080 swaggerapi/swagger-ui"
+echo -e "docker create -it --name ${docker_name} -e API_URL=${api_url} -p ${host_port}:8080 swaggerapi/swagger-ui"
 docker create -it --name ${docker_name} -e API_URL=${api_url} -p ${host_port}:8080 swaggerapi/swagger-ui
-echo -e "create success see at sudo docker ps -a"
-echo -e "you must run it"
+echo -e "create success see at => sudo docker ps -a"
+echo -e "you must run container => sudo docker start ${docker_name}"
 echo -e "access on ${access_protocol}${host_domain}:${host_port}${access_route}"
