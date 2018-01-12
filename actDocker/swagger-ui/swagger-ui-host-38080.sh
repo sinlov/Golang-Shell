@@ -45,7 +45,7 @@ Evn
 name: ${docker_name}
 host port: ${host_port}
 host domain: ${host_domain}
-volume path: ${swagger-ui_data}
+volume path: ${swagger_ui_data}
 api_url=${api_url}
 "
 
@@ -61,7 +61,7 @@ checkEnv docker
 old_container=$(docker ps --filter 'name=${docker_name}' | wc -l)
 echo -e "old_container ${old_container}"
 
-if [[ "${olo_container}" > "1" ]]; then
+if [[ "${old_container}" > "1" ]]; then
     echo -e "find out same name [ ${docker_name} ] container just rm it"
     echo -e "docker stop ${docker_name}"
     docker stop ${docker_name}
