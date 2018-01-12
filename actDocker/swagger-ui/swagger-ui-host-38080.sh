@@ -4,7 +4,7 @@ echo "need sudo!"
 now_path="`sudo pwd`"
 echo -e "now path ${now_path}"
 
-run_path=$(sudo pwd)
+run_path=$(pwd)
 shell_run_name=$(basename $0)
 shell_run_path=$(cd `dirname $0`; pwd)
 
@@ -75,6 +75,6 @@ echo -e "Just try run swagger-ui as docker"
 
 echo -e "docker create -it --name ${docker_name} -e API_URL=${api_url} -p ${host_port}:8080 swaggerapi/swagger-ui"
 docker create -it --name ${docker_name} -e API_URL=${api_url} -p ${host_port}:8080 swaggerapi/swagger-ui
-echo -e "create success see at => sudo docker ps -a"
-echo -e "you must run container => sudo docker start ${docker_name}"
+echo -e "create success see at => docker ps -a"
+echo -e "you must run container => docker start ${docker_name}"
 echo -e "access on ${access_protocol}${host_domain}:${host_port}${access_route}"
