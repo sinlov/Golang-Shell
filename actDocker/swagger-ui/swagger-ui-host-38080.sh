@@ -1,8 +1,9 @@
 #!/bin/bash
 
-echo "need sudo!"
-now_path="`sudo pwd`"
-echo -e "now path ${now_path}"
+if [[ "$USER" != "root" ]]; then
+  echo -e "must run as sudo"
+  exit 1
+fi
 
 run_path=$(pwd)
 shell_run_name=$(basename $0)
